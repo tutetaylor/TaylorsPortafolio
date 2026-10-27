@@ -242,6 +242,24 @@ h2 .it{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing
 .ed-metrics span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 @media (max-width:480px){.ed-body{font-size:11px}.ed-body .row{grid-template-columns:24px 78px 1fr}.ed-metrics strong{font-size:1.15rem}}
 
+/* ============ DATA ============ */
+.dgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.dcard{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;transition:border-color .25s,transform .25s}
+.dcard:hover{border-color:color-mix(in srgb,var(--lime) 50%,transparent);transform:translateY(-3px)}
+.dcard .th{display:block;aspect-ratio:16/9;overflow:hidden;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.dcard .th img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.dcard:hover .th img{transform:scale(1.03)}
+.dcard .b{padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.dcard h3{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:-.025em;line-height:1.15}
+.dcard .q{color:var(--muted);font-size:14px}
+.dres{display:flex;gap:12px;align-items:baseline;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.dres strong{font-family:var(--display);font-size:1.5rem;font-weight:700;letter-spacing:-.03em;color:var(--acc);white-space:nowrap}
+.dres span{font-size:13px;color:var(--muted)}
+.dcard .w-foot{margin-top:auto;padding-top:6px;align-items:center}
+.data-more{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;align-items:center}
+.data-note{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#d9a521;border:1px dashed rgba(217,165,33,.5);padding:5px 10px;border-radius:999px}
+@media (max-width:860px){.dgrid{grid-template-columns:1fr}}
+
 /* ============ TIMELINE ============ */
 .tl{position:relative;max-width:980px;margin-left:auto}
 .tl::before{content:'';position:absolute;left:146px;top:8px;bottom:36px;width:1px;background:linear-gradient(var(--lime),var(--line) 38%,var(--line))}
@@ -411,6 +429,7 @@ footer::before{content:'';position:absolute;left:50%;top:-260px;width:min(780px,
     <a class="brand" href="#top" aria-label="Mateo Taylor — inicio"><b>&lt;/&gt;</b> Mateo Taylor <small>/ INDEX</small></a>
     <ul class="links" id="links">
       <li><a href="#trabajos"><i>01</i><x-t data-en="Works">Trabajos</x-t></a></li>
+      <li><a href="#data"><i>01.1</i>Data</a></li>
       <li><a href="#trayectoria"><i>02</i><x-t data-en="Experience">Trayectoria</x-t></a></li>
       <li><a href="#toolkit"><i>03</i>Toolkit</a></li>
       <li><a href="#sobre-mi"><i>04</i><x-t data-en="About">Sobre mí</x-t></a></li>
@@ -585,6 +604,68 @@ footer::before{content:'';position:absolute;left:50%;top:-260px;width:min(780px,
   </div>
 </section>
 
+<!-- ============ 01.1 DATA ============ -->
+<section class="sec" id="data" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-bar rv"><b>01.1</b><span>Data Science &amp; Analytics</span></div>
+    <div class="sec-head">
+      <h2 class="rv"><x-t data-en="Data that ends&lt;br&gt;in &lt;span class=&quot;it&quot;&gt;decisions.&lt;/span&gt;">Datos que terminan<br>en <span class="it">decisiones.</span></x-t></h2>
+      <p class="rv"><x-t data-en="Four end-to-end analytics and machine-learning projects: a business question, data cleaning, a model against a baseline, and a recommendation with its dollar impact.">Cuatro proyectos de análisis y machine learning de punta a punta: pregunta de negocio, limpieza, modelo contra un baseline y una recomendación con su impacto en plata.</x-t></p>
+    </div>
+    <div class="dgrid">
+      <article class="dcard rv">
+        <a class="th" href="data/ecommerce/"><img src="data/assets/thumb-ecommerce.webp" width="960" height="600" loading="lazy" decoding="async" alt="Dashboard 01"></a>
+        <div class="b">
+          <p class="w-cat"><b>01</b><i></i>Data Analyst · E-commerce</p>
+          <h3><x-t data-en="Customers, cohorts &amp; LTV/CAC">Clientes, cohortes y LTV/CAC</x-t></h3>
+          <p class="q"><x-t data-en="Is the store growing in a healthy way? Cohort retention, customer value by channel and RFM segmentation.">¿La tienda crece de forma sana? Retención por cohorte, valor de cada cliente según su canal y segmentación RFM.</x-t></p>
+          <div class="dres"><strong>3,0x</strong><span><x-t data-en="LTV/CAC of the fastest-growing channel: right at the healthy limit.">LTV/CAC del canal que más crece: justo en el límite sano.</x-t></span></div>
+          <div class="w-foot"><div class="tags"><span>pandas</span><span>SQL</span><span><x-t data-en="Cohorts">Cohortes</x-t></span><span>RFM</span></div>
+            <a class="go" href="data/ecommerce/" aria-label="Abrir dashboard" data-en-aria="Open dashboard"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
+        </div>
+      </article>
+      <article class="dcard rv">
+        <a class="th" href="data/marketing/"><img src="data/assets/thumb-marketing.webp" width="960" height="600" loading="lazy" decoding="async" alt="Dashboard 02"></a>
+        <div class="b">
+          <p class="w-cat"><b>02</b><i></i>Data Analyst · Marketing</p>
+          <h3><x-t data-en="Conversion funnel &amp; A/B test">Embudo de conversión y A/B test</x-t></h3>
+          <p class="q"><x-t data-en="Does a one-page checkout sell more? Funnel by channel and an experiment evaluated with statistical rigor.">¿El checkout de una página vende más? Embudo por canal y un experimento evaluado con rigor estadístico.</x-t></p>
+          <div class="dres"><strong>+5,1 pp</strong><span><x-t data-en="conversion (p &lt; 0.001): ~US$ 14,000 more per month.">de conversión (p < 0,001): ~US$ 14.000 más por mes.</x-t></span></div>
+          <div class="w-foot"><div class="tags"><span>SciPy</span><span>A/B test</span><span>Bootstrap</span></div>
+            <a class="go" href="data/marketing/" aria-label="Abrir dashboard" data-en-aria="Open dashboard"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
+        </div>
+      </article>
+      <article class="dcard rv">
+        <a class="th" href="data/fraude/"><img src="data/assets/thumb-fraude.webp" width="960" height="600" loading="lazy" decoding="async" alt="Dashboard 03"></a>
+        <div class="b">
+          <p class="w-cat"><b>03</b><i></i>Data Scientist · Fintech</p>
+          <h3><x-t data-en="Fraud detection with machine learning">Detección de fraude con machine learning</x-t></h3>
+          <p class="q"><x-t data-en="A model that replaces a fixed rule and decides when to alert based on the cost of each mistake.">Un modelo que reemplaza una regla fija y decide cuándo alertar según el costo de cada error.</x-t></p>
+          <div class="dres"><strong>−24%</strong><span><x-t data-en="cost versus the current rule, with fewer alerts.">de costo frente a la regla actual, con menos alertas.</x-t></span></div>
+          <div class="w-foot"><div class="tags"><span>scikit-learn</span><span>Gradient boosting</span><span>PR-AUC</span></div>
+            <a class="go" href="data/fraude/" aria-label="Abrir dashboard" data-en-aria="Open dashboard"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
+        </div>
+      </article>
+      <article class="dcard rv">
+        <a class="th" href="data/bicis/"><img src="data/assets/thumb-bicis.webp" width="960" height="600" loading="lazy" decoding="async" alt="Dashboard 04"></a>
+        <div class="b">
+          <p class="w-cat"><b>04</b><i></i>Data Scientist · <x-t data-en="Transport">Transporte</x-t></p>
+          <h3><x-t data-en="Bike-share demand in Buenos Aires">Demanda de bicis en Buenos Aires</x-t></h3>
+          <p class="q"><x-t data-en="How many bikes will be used tomorrow, hour by hour? Calendar, weather and scenarios to plan operations.">¿Cuántas bicis se van a usar mañana, hora por hora? Calendario, clima y escenarios para planificar la operación.</x-t></p>
+          <div class="dres"><strong>−39%</strong><span><x-t data-en="error versus &quot;same as last week&quot;.">de error frente a "igual que la semana pasada".</x-t></span></div>
+          <div class="w-foot"><div class="tags"><span><x-t data-en="Time series">Series de tiempo</x-t></span><span>Poisson GBM</span></div>
+            <a class="go" href="data/bicis/" aria-label="Abrir dashboard" data-en-aria="Open dashboard"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
+        </div>
+      </article>
+    </div>
+    <div class="data-more rv">
+      <a class="btn primary" href="data/"><x-t data-en="See all 4 projects">Ver los 4 proyectos</x-t> <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data" target="_blank" rel="noopener"><x-t data-en="Notebooks on GitHub">Notebooks en GitHub</x-t></a>
+      <span class="data-note"><x-t data-en="Simulated data">Datos simulados</x-t></span>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 02 TRAJECTORY ============ -->
 <section class="sec" id="trayectoria">
   <div class="wrap">
@@ -631,9 +712,9 @@ footer::before{content:'';position:absolute;left:50%;top:-260px;width:min(780px,
       <div class="kit-row rv"><i>01</i><div><h3>Frontend</h3><p><x-t data-en="Interfaces, responsive design and motion.">Interfaces, diseño responsive y movimiento.</x-t></p></div>
         <div class="tags"><span>HTML <em>×4</em></span><span>CSS <em>×4</em></span><span>JavaScript <em>×4</em></span><span>React</span><span><x-t data-en="Responsive design">Diseño responsive</x-t> <em>×4</em></span><span>WordPress</span></div></div>
       <div class="kit-row rv"><i>02</i><div><h3>Backend</h3><p><x-t data-en="Logic, APIs and services.">Lógica, APIs y servicios.</x-t></p></div>
-        <div class="tags"><span>Python <em>×1</em></span><span>Flask</span></div></div>
-      <div class="kit-row rv"><i>03</i><div><h3><x-t data-en="Data &amp; AI">Datos e IA</x-t></h3><p><x-t data-en="Analysis, databases and models.">Análisis, bases de datos y modelos.</x-t></p></div>
-        <div class="tags"><span><x-t data-en="Python for data science">Python para data science</x-t></span><span>SQL</span><span>MySQL</span><span>PostgreSQL</span><span>Vosk <em>×1</em></span><span><x-t data-en="Generative AI">IA generativa</x-t> <em>×1</em></span></div></div>
+        <div class="tags"><span>Python <em>×5</em></span><span>Flask</span></div></div>
+      <div class="kit-row rv"><i>03</i><div><h3><x-t data-en="Data &amp; AI">Datos e IA</x-t></h3><p><x-t data-en="Analysis, statistics and machine learning.">Análisis, estadística y machine learning.</x-t></p></div>
+        <div class="tags"><span>pandas <em>×4</em></span><span>matplotlib <em>×4</em></span><span>scikit-learn <em>×2</em></span><span>SciPy <em>×1</em></span><span>SQL <em>×1</em></span><span>MySQL</span><span>PostgreSQL</span><span><x-t data-en="A/B testing">A/B testing</x-t> <em>×1</em></span><span>Vosk <em>×1</em></span><span><x-t data-en="Generative AI">IA generativa</x-t> <em>×1</em></span></div></div>
       <div class="kit-row rv"><i>04</i><div><h3>Mobile</h3><p><x-t data-en="Apps I run from my phone.">Apps que controlo desde el celular.</x-t></p></div>
         <div class="tags"><span>Android <em>×2</em></span></div></div>
       <div class="kit-row rv"><i>05</i><div><h3><x-t data-en="Tools">Herramientas</x-t></h3><p><x-t data-en="Everything around the code.">Todo lo que rodea al código.</x-t></p></div>
@@ -785,7 +866,7 @@ footer::before{content:'';position:absolute;left:50%;top:-260px;width:min(780px,
   menu.addEventListener('click',()=>{const o=nav.classList.toggle('open');menu.setAttribute('aria-expanded',o);});
   document.querySelectorAll('#links a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded',false);}));
   const map={}; document.querySelectorAll('#links a').forEach(a=>map[a.getAttribute('href').slice(1)]=a);
-  const secs=['trabajos','trayectoria','toolkit','certificaciones','sobre-mi','contacto'].map(id=>document.getElementById(id));
+  const secs=['trabajos','data','trayectoria','toolkit','certificaciones','sobre-mi','contacto'].map(id=>document.getElementById(id));
   const owner={certificaciones:'toolkit'};
   const so=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const id=owner[e.target.id]||e.target.id;
       Object.values(map).forEach(a=>a.classList.remove('on')); map[id]&&map[id].classList.add('on'); }}),{rootMargin:'-45% 0px -50% 0px'});
