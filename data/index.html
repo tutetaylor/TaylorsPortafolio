@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Science & Analytics — Mateo Taylor</title>
+<meta name="title-en" content="Data Science & Analytics — Mateo Taylor">
+<meta name="description" content="Proyectos de análisis de datos y machine learning de Mateo Taylor: e-commerce, marketing, fintech y transporte.">
+<meta name="theme-color" content="#0c0e0b">
+<meta property="og:title" content="Data Science & Analytics — Mateo Taylor">
+<meta property="og:description" content="4 proyectos: cohortes y LTV, A/B testing, detección de fraude y pronóstico de demanda.">
+<meta property="og:image" content="https://www.taylorsportafolio.com/data/assets/thumb-fraude.webp">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/dash.css">
+<style>
+h1{max-width:16ch}
+h1 .it{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;color:var(--acc);letter-spacing:-.01em}
+.projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.proj{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .25s,transform .25s}
+.proj:hover{border-color:color-mix(in srgb,var(--acc) 50%,transparent);transform:translateY(-3px)}
+.proj .th{display:block;aspect-ratio:16/10;overflow:hidden;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.proj .th img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.proj:hover .th img{transform:scale(1.03)}
+.proj .b{padding:20px 20px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.proj .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:flex;gap:10px;align-items:center}
+.proj .k b{color:var(--acc);font-weight:500}
+.proj h2{font-family:var(--display);font-weight:700;font-size:1.55rem;letter-spacing:-.03em;line-height:1.1}
+.proj .q{color:var(--muted);font-size:14.5px}
+.res{display:flex;gap:12px;align-items:baseline;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;margin-top:2px}
+.res strong{font-family:var(--display);font-size:1.7rem;font-weight:700;letter-spacing:-.03em;color:var(--acc);white-space:nowrap}
+.res span{font-size:13px;color:var(--muted)}
+.proj .tags{display:flex;flex-wrap:wrap;gap:6px}
+.proj .tags span{font-family:var(--mono);font-size:10.5px;color:var(--muted);border:1px solid var(--line);padding:2px 7px;border-radius:3px}
+.proj .act{display:flex;gap:8px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.flow div{padding:18px;border-right:1px solid var(--line)}.flow div:last-child{border-right:0}
+.flow i{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--acc)}
+.flow h3{font-family:var(--display);font-size:1.05rem;font-weight:700;margin:8px 0 6px}
+.flow p{font-size:13.5px;color:var(--muted)}
+.disc{margin-top:16px;border:1px dashed rgba(242,193,78,.45);border-radius:10px;padding:16px 18px;color:var(--muted);font-size:14px}
+.disc b{color:var(--c3)}
+@media (max-width:860px){.projects{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.flow div:nth-child(2){border-right:0}.flow div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media (max-width:520px){.flow{grid-template-columns:1fr}.flow div{border-right:0;border-bottom:1px solid var(--line)}.flow div:last-child{border-bottom:0}}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="crumb"><a href="https://www.taylorsportafolio.com/"><b>&lt;/&gt;</b> Mateo Taylor</a><small>/ DATA</small></div>
+  <div class="lang" role="group" aria-label="Idioma"><button data-lang="es" aria-pressed="true">ES</button>/<button data-lang="en" aria-pressed="false">EN</button></div>
+</div></div>
+
+<main class="wrap">
+<header class="hd">
+  <p class="kick"><b>Data Science & Analytics</b><span><x-t data-en="Python · SQL · machine learning">Python · SQL · machine learning</x-t></span></p>
+  <h1><x-t data-en="Data that ends in &lt;span class=&quot;it&quot;&gt;decisions.&lt;/span&gt;">Datos que terminan en <span class="it">decisiones.</span></x-t></h1>
+  <p class="sub"><x-t data-en="Four end-to-end projects: a business question, data with real-world quality issues, the analysis or model, and a recommendation with its estimated impact. Each one has an executed notebook and an interactive dashboard.">Cuatro proyectos de punta a punta: una pregunta de negocio, datos con problemas reales de calidad, el análisis o el modelo, y una recomendación con su impacto estimado. Cada uno tiene un notebook ejecutado y un dashboard interactivo.</x-t></p>
+  <div class="hd-row">
+    <a class="btn pri" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg><x-t data-en="GitHub repository">Repositorio en GitHub</x-t></a>
+    <a class="btn" href="https://www.taylorsportafolio.com/"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><x-t data-en="Back to portfolio">Volver al portfolio</x-t></a>
+  </div>
+</header>
+
+<section class="projects">
+  <article class="proj">
+    <a class="th" href="ecommerce/"><img src="assets/thumb-ecommerce.webp" width="960" height="600" alt="Dashboard e-commerce" loading="lazy"></a>
+    <div class="b">
+      <p class="k"><b>01</b>Data Analyst · E-commerce</p>
+      <h2><x-t data-en="Customers, cohorts &amp; LTV/CAC">Clientes, cohortes y LTV/CAC</x-t></h2>
+      <p class="q"><x-t data-en="Is the store growing in a healthy way? Cohort retention, customer value by acquisition channel, and RFM segmentation.">¿La tienda crece de forma sana? Retención por cohorte, valor de cada cliente según el canal que lo trajo y segmentación RFM.</x-t></p>
+      <div class="res"><strong>3,0x</strong><span><x-t data-en="LTV/CAC of the fastest-growing channel (Paid Social): right at the healthy limit.">LTV/CAC del canal que más crece (Paid Social): justo en el límite sano.</x-t></span></div>
+      <div class="tags"><span>pandas</span><span>SQL</span><span><x-t data-en="Cohorts">Cohortes</x-t></span><span>RFM</span></div>
+      <div class="act"><a class="btn pri" href="ecommerce/">Dashboard</a><a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/01-ecommerce-cohortes/analisis.ipynb" target="_blank" rel="noopener">Notebook</a></div>
+    </div>
+  </article>
+  <article class="proj">
+    <a class="th" href="marketing/"><img src="assets/thumb-marketing.webp" width="960" height="600" alt="Dashboard marketing" loading="lazy"></a>
+    <div class="b">
+      <p class="k"><b>02</b>Data Analyst · Marketing</p>
+      <h2><x-t data-en="Conversion funnel &amp; A/B test">Embudo de conversión y A/B test</x-t></h2>
+      <p class="q"><x-t data-en="Does a one-page checkout sell more? Funnel by channel and device, and an experiment evaluated with statistical rigor.">¿El checkout de una página vende más? Embudo por canal y dispositivo, y un experimento evaluado con rigor estadístico.</x-t></p>
+      <div class="res"><strong>+5,1 pp</strong><span><x-t data-en="checkout conversion (p &amp;lt; 0.001), almost all on mobile: ~US$ 14,000 more per month.">de conversión del checkout (p &lt; 0,001), casi todo en mobile: ~US$ 14.000 más por mes.</x-t></span></div>
+      <div class="tags"><span>SciPy</span><span>A/B testing</span><span>Bootstrap</span><span><x-t data-en="Power">Potencia</x-t></span></div>
+      <div class="act"><a class="btn pri" href="marketing/">Dashboard</a><a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/02-marketing-ab-test/analisis.ipynb" target="_blank" rel="noopener">Notebook</a></div>
+    </div>
+  </article>
+  <article class="proj">
+    <a class="th" href="fraude/"><img src="assets/thumb-fraude.webp" width="960" height="600" alt="Dashboard fraude" loading="lazy"></a>
+    <div class="b">
+      <p class="k"><b>03</b>Data Scientist · Fintech</p>
+      <h2><x-t data-en="Fraud detection with machine learning">Detección de fraude con machine learning</x-t></h2>
+      <p class="q"><x-t data-en="A model that replaces a fixed rule and decides when to alert based on the real cost of each mistake.">Un modelo que reemplaza una regla fija y decide cuándo alertar según el costo real de cada error.</x-t></p>
+      <div class="res"><strong>−24%</strong><span><x-t data-en="cost versus the current rule, with fewer alerts and 88% of fraudulent value caught.">de costo frente a la regla actual, con menos alertas y el 88% del monto fraudulento detectado.</x-t></span></div>
+      <div class="tags"><span>scikit-learn</span><span>Gradient boosting</span><span>PR-AUC</span><span><x-t data-en="Calibration">Calibración</x-t></span></div>
+      <div class="act"><a class="btn pri" href="fraude/">Dashboard</a><a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/03-fintech-fraude/analisis.ipynb" target="_blank" rel="noopener">Notebook</a></div>
+    </div>
+  </article>
+  <article class="proj">
+    <a class="th" href="bicis/"><img src="assets/thumb-bicis.webp" width="960" height="600" alt="Dashboard bicis" loading="lazy"></a>
+    <div class="b">
+      <p class="k"><b>04</b>Data Scientist · <x-t data-en="Transport">Transporte</x-t></p>
+      <h2><x-t data-en="Bike-share demand forecast in Buenos Aires">Pronóstico de demanda de bicis en Buenos Aires</x-t></h2>
+      <p class="q"><x-t data-en="How many bikes will be used tomorrow, hour by hour? Calendar, weather and scenarios to plan operations.">¿Cuántas bicis se van a usar mañana, hora por hora? Calendario, clima y escenarios para planificar la operación.</x-t></p>
+      <div class="res"><strong>−39%</strong><span><x-t data-en="error versus &quot;same as last week&quot; (WAPE 16% vs 26%).">de error frente a "igual que la semana pasada" (WAPE 16% vs 26%).</x-t></span></div>
+      <div class="tags"><span><x-t data-en="Time series">Series de tiempo</x-t></span><span>Poisson GBM</span><span><x-t data-en="Time-based CV">Validación temporal</x-t></span></div>
+      <div class="act"><a class="btn pri" href="bicis/">Dashboard</a><a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/04-transporte-bicis/analisis.ipynb" target="_blank" rel="noopener">Notebook</a></div>
+    </div>
+  </article>
+</section>
+
+<section class="sec">
+  <p class="sec-t"><b>·</b><x-t data-en="How I approach each project">Cómo trabajo cada proyecto</x-t></p>
+  <div class="flow">
+    <div><i>01</i><h3><x-t data-en="Business question">Pregunta de negocio</x-t></h3><p><x-t data-en="I start from the decision to be made, not from the dataset.">Arranco por la decisión que hay que tomar, no por el dataset.</x-t></p></div>
+    <div><i>02</i><h3><x-t data-en="Data &amp; quality">Datos y calidad</x-t></h3><p><x-t data-en="Duplicates, bots, mislabeled categories: I find them and document every fix.">Duplicados, bots, categorías mal cargadas: los encuentro y documento cada corrección.</x-t></p></div>
+    <div><i>03</i><h3><x-t data-en="Analysis or model">Análisis o modelo</x-t></h3><p><x-t data-en="Always against a simple baseline with honest validation: time-based splits and out-of-sample tests.">Siempre contra un baseline simple y con validación honesta: partición temporal y test fuera de muestra.</x-t></p></div>
+    <div><i>04</i><h3><x-t data-en="Decision &amp; impact">Decisión e impacto</x-t></h3><p><x-t data-en="I close with a concrete recommendation and its dollar value, with an uncertainty range.">Cierro con una recomendación concreta y lo que vale en plata, con su rango de incertidumbre.</x-t></p></div>
+  </div>
+  <p class="disc"><b><x-t data-en="About the data:">Sobre los datos:</x-t></b> <x-t data-en="the datasets are simulated with realistic business rules and deliberate data-quality issues. Each project includes the script that generates them and is written to work with real data in the same schema (for example, Olist for e-commerce or the GCBA&#x27;s open EcoBici data).">los datasets son simulados con reglas de negocio realistas y errores de carga a propósito. Cada proyecto incluye el script que los genera y está escrito para funcionar con datos reales del mismo esquema (por ejemplo, Olist para e-commerce o los datos abiertos de EcoBici del GCBA).</x-t></p>
+</section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Mateo Taylor · <a href="https://www.taylorsportafolio.com/">taylorsportafolio.com</a></span><span><x-t data-en="Data Science · UBA">Ciencia de Datos · UBA</x-t></span></div></footer>
+<script src="assets/dash.js"></script>
+</body>
+</html>

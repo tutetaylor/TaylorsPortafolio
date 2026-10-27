@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bicis públicas: pronóstico de demanda — Mateo Taylor</title>
+<meta name="title-en" content="Bike share: demand forecasting — Mateo Taylor">
+<meta name="description" content="Pronóstico horario de demanda de bicicletas públicas en Buenos Aires con clima y calendario. Proyecto de Mateo Taylor.">
+<meta name="theme-color" content="#0c0e0b">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dash.css">
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="crumb"><a href="https://www.taylorsportafolio.com/"><b>&lt;/&gt;</b> Mateo Taylor</a><small>/ <a href="../">DATA</a> / [[BICIS¦BIKE SHARE]]</small></div>
+  <div class="lang" role="group" aria-label="Idioma"><button data-lang="es" aria-pressed="true">ES</button>/<button data-lang="en" aria-pressed="false">EN</button></div>
+</div></div>
+
+<main class="wrap">
+<header class="hd">
+  <p class="kick"><b>04 · Data Scientist</b><span>[[Transporte¦Transport]] · [[Series de tiempo¦Time series]] · [[Pronóstico¦Forecasting]]</span></p>
+  <h1>[[¿Cuántas bicis se van a usar mañana?¦How many bikes will be used tomorrow?]]</h1>
+  <p class="sub">[[Pronóstico hora por hora de la demanda de un sistema de bicicletas públicas en Buenos Aires, con calendario y clima, para planificar la redistribución y los turnos con un día de anticipación.¦An hour-by-hour demand forecast for a Buenos Aires bike-share system, using the calendar and weather, to plan rebalancing and staff shifts one day ahead.]]</p>
+  <div class="hd-row">
+    <a class="btn pri" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/04-transporte-bicis/analisis.ipynb" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg>[[Ver notebook¦View notebook]]</a>
+    <a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data/projects/04-transporte-bicis" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>[[Código y datos¦Code & data]]</a>
+    <span class="note">[[Datos simulados¦Simulated data]]</span>
+  </div>
+  <div class="stack"><span>Python</span><span>pandas</span><span>scikit-learn</span><span>Gradient boosting (Poisson)</span><span>[[Validación temporal¦Time-based validation]]</span><span>[[Escenarios¦Scenarios]]</span></div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="grid">
+  <article class="card w12">
+    <h2>[[Viajes promedio por hora y día de la semana¦Average trips by hour and weekday]]</h2>
+    <p class="cap">[[Días hábiles: picos de ida y vuelta al trabajo. Fines de semana: uso recreativo de tarde.¦Weekdays: commute peaks. Weekends: leisure riding in the afternoon.]]</p>
+    <div class="tw"><div id="ch-mapa" style="min-width:640px"></div></div>
+  </article>
+
+  <article class="card w12">
+    <h2>[[Una semana de prueba: real vs. pronóstico¦A test week: actual vs. forecast]]</h2>
+    <p class="cap" id="cap-sem"></p>
+    <div id="ch-sem" data-h="280"></div>
+  </article>
+
+  <article class="card">
+    <h2>[[Error total por método (sep–dic 2025)¦Total error by method (Sep–Dec 2025)]]</h2>
+    <p class="cap">[[WAPE: error absoluto total como % de la demanda. Menor es mejor.¦WAPE: total absolute error as a % of demand. Lower is better.]]</p>
+    <div id="ch-mod"></div>
+  </article>
+  <article class="card">
+    <h2>[[Error medio por hora del día¦Mean error by hour of day]]</h2>
+    <p class="cap">[[El modelo reduce el error justo en los picos, donde más importa.¦The model cuts error right at the peaks, where it matters most.]]</p>
+    <div id="ch-err" data-h="220"></div>
+  </article>
+
+  <article class="card w7">
+    <h2>[[Escenario: ¿y si llueve a la tarde?¦Scenario: what if it rains in the afternoon?]]</h2>
+    <p class="cap">[[Pronóstico de un miércoles de octubre, seco vs. con lluvia de 14 a 21 h.¦Forecast for a Wednesday in October, dry vs. rain from 2 to 9 pm.]]</p>
+    <div class="ctl"><div class="seg" id="seg-esc"><button data-v="llovizna" aria-pressed="false">[[Llovizna¦Drizzle]]</button><button data-v="moderada" aria-pressed="true">[[Moderada¦Moderate]]</button><button data-v="fuerte" aria-pressed="false">[[Fuerte¦Heavy]]</button></div></div>
+    <div id="ch-esc" data-h="240"></div>
+    <div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 0" id="esc-k"></div>
+  </article>
+  <article class="card w5">
+    <h2>[[¿Qué mira el modelo?¦What does the model look at?]]</h2>
+    <p class="cap">[[Aumento del error (viajes/hora) al mezclar cada variable.¦Increase in error (trips/hour) when each variable is shuffled.]]</p>
+    <div id="ch-imp"></div>
+  </article>
+
+  <article class="card">
+    <h2>[[Demanda relativa según la lluvia¦Relative demand by rainfall]]</h2>
+    <p class="cap">[[Frente a horas equivalentes (mismo tipo de día y franja).¦Versus equivalent hours (same day type and time slot).]]</p>
+    <div id="ch-lluvia" data-h="210"></div>
+  </article>
+  <article class="card">
+    <h2>[[Demanda relativa según la temperatura¦Relative demand by temperature]]</h2>
+    <p class="cap">[[Óptimo entre 16 y 28 °C; con frío la demanda cae fuerte.¦Optimal between 16 and 28 °C; demand drops sharply in the cold.]]</p>
+    <div id="ch-temp" data-h="210"></div>
+  </article>
+
+  <article class="card w12">
+    <h2>[[Viajes por día, 2024–2025¦Trips per day, 2024–2025]]</h2>
+    <p class="cap">[[Estacionalidad (invierno bajo) y crecimiento del sistema, con un salto tras la ampliación de julio 2025.¦Seasonality (low in winter) and system growth, with a jump after the July 2025 expansion.]]</p>
+    <div id="ch-dia" data-h="230"></div>
+  </article>
+</section>
+
+<section class="sec"><p class="sec-t"><b>01</b>[[Hallazgos¦Findings]]</p><div class="finds" id="finds"></div></section>
+<section class="sec"><p class="sec-t"><b>02</b>[[Cómo lo usaría la operación¦How operations would use it]]</p><div class="finds" id="recs"></div></section>
+<section class="sec"><p class="sec-t"><b>03</b>[[Metodología¦Methodology]]</p><dl class="method" id="method"></dl></section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Mateo Taylor · <a href="https://www.taylorsportafolio.com/">taylorsportafolio.com</a></span><span>[[Gráficos propios en SVG, sin librerías externas.¦Custom SVG charts, no external libraries.]]</span></div></footer>
+
+<script>/*DATA*/</script>
+<script src="../assets/charts.js"></script>
+<script src="../assets/dash.js"></script>
+<script>
+(function(){
+  const D = window.DATA, $ = s => document.querySelector(s);
+  const DES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], DEN = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MOD = {'Gradient boosting':['Gradient boosting','Gradient boosting'],'Regresión Ridge':['Regresión Ridge','Ridge regression'],'Igual que la semana pasada':['Igual que la semana pasada','Same as last week'],'Promedio histórico':['Promedio histórico','Historical average']};
+  const LLU = {'sin lluvia':'no rain','llovizna (≤1 mm)':'drizzle (≤1 mm)','moderada (1–5 mm)':'moderate (1–5 mm)','fuerte (>5 mm)':'heavy (>5 mm)'};
+  const VAR = {'Hora':'Hour','Promedio 7 días, misma hora':'7-day average, same hour','Misma hora, semana anterior':'Same hour, last week','Día no laborable':'Non-working day','Lluvia (mm)':'Rain (mm)','Temperatura':'Temperature','Día de la semana':'Day of week','Feriado':'Public holiday','Viento':'Wind','Mes':'Month','Humedad':'Humidity','Tendencia':'Trend','Llueve (sí/no)':'Raining (yes/no)','Vacaciones':'Holidays'};
+  const kpi = (l,v,n) => `<div class="kpi"><span>${l}</span><strong>${v}</strong>${n?`<small>${n}</small>`:''}</div>`;
+  let esc = 'moderada';
+  const semLab = iso => { const d = new Date(iso.slice(0,10)+'T12:00:00'), dw = (d.getDay()+6)%7; return `${L(DES,DEN)[dw]} ${iso.slice(8,10)}/${iso.slice(5,7)} ${iso.slice(11,13)}h`; };
+
+  function escRender(){
+    const E = D.escenario, I = E.intensidades[esc], hrs = Array.from({length:24},(_,h)=>h+'h');
+    DC.line($('#ch-esc'), {labels:hrs, yMin:0, series:[{name:L('Día seco','Dry day'), data:E.seco, color:'#c5f23a'},{name:L('Con lluvia','With rain'), data:I.pred, color:'#5fd4c4'}], tipFmt:v=>fmt.int(v)+L(' viajes',' trips')});
+    const s1 = E.seco.reduce((a,b)=>a+b,0), s2 = I.pred.reduce((a,b)=>a+b,0);
+    $('#esc-k').innerHTML = kpi(L('Día seco','Dry day'), fmt.int(s1), L('viajes','trips')) + kpi(L('Con lluvia','With rain'), fmt.int(s2), fmt.dec(I.mm,1)+' mm/h') + kpi(L('Caída del día','Daily drop'), '−'+fmt.pct(I.perdida,0), L('menos bicis a redistribuir','fewer bikes to rebalance'));
+  }
+
+  function render(){
+    const K = D.kpis, M = D.modelos, gb = M.find(m=>m.modelo==='Gradient boosting'), base = M.find(m=>m.modelo==='Igual que la semana pasada');
+    $('#kpis').innerHTML =
+      kpi(L('Viajes por día','Trips per day'), fmt.int(K.viajes_dia), '<b>+'+fmt.pct(K.crec,0)+'</b>'+L(' en 2025',' in 2025')) +
+      kpi(L('Error del modelo (WAPE)','Model error (WAPE)'), fmt.pct(gb.WAPE,0), L('baseline: ','baseline: ')+fmt.pct(base.WAPE,0)) +
+      kpi(L('Menos error','Error reduction'), '−'+fmt.pct(gb['mejora vs. semana pasada'],0), L('vs. "igual que la semana pasada"','vs. "same as last week"')) +
+      kpi(L('Con lluvia fuerte','In heavy rain'), '−'+fmt.pct(1-K.lluvia_fuerte,0), L('de demanda vs. horas secas','demand vs. dry hours')) +
+      kpi(L('Hora pico promedio','Average peak hour'), fmt.int(K.pico), L('viajes por hora · días hábiles 18 h','trips per hour · weekdays 6 pm'));
+
+    DC.heat($('#ch-mapa'), {rows:L(DES,DEN), cols:Array.from({length:24},(_,h)=>h+'h'), values:D.mapa.valores, fmt:v=>fmt.int(v), valueName:L('viajes/hora','trips/hour'), cellH:26, labelW:44});
+
+    const S = D.semana;
+    const join = (a, y) => a.length < 2 ? a.join('') : a.slice(0,-1).join(', ') + y + a[a.length-1];
+    const dl = [...new Set(S.labels.filter((l,i)=>S.lluvia[i]>1).map(l=>l.slice(8,10)+'/'+l.slice(5,7)))];
+    $('#cap-sem').textContent = L(`Del ${S.labels[0].slice(8,10)}/${S.labels[0].slice(5,7)} al ${S.labels[167].slice(8,10)}/${S.labels[167].slice(5,7)}/2025. Llovió el ${join(dl,' y el ')}: el modelo anticipa la caída que el baseline no ve.`,
+                                  `${S.labels[0].slice(5,7)}/${S.labels[0].slice(8,10)} to ${S.labels[167].slice(5,7)}/${S.labels[167].slice(8,10)}/2025. It rained on ${join(dl.map(x=>x.split('/').reverse().join('/')),' and ')}: the model anticipates the drop the baseline misses.`);
+    DC.line($('#ch-sem'), {labels:S.labels.map(semLab), labelGap:130, yMin:0, series:[
+      {name:L('Real','Actual'), data:S.real, color:'#9ba393', width:2.4},
+      {name:L('Pronóstico','Forecast'), data:S.pred, color:'#c5f23a', width:1.8},
+      {name:L('Igual que la semana pasada','Same as last week'), data:S.base, color:'#f2c14e', dash:true, width:1.2}], tipFmt:v=>fmt.int(v)});
+
+    const Ms = [...M].sort((a,b)=>a.WAPE-b.WAPE);
+    DC.bars($('#ch-mod'), {horizontal:true, labels:Ms.map(m=>L(...MOD[m.modelo])), labelW:180, series:[{name:'', data:Ms.map(m=>m.WAPE), colors:Ms.map(m=>m.modelo==='Gradient boosting'?'#c5f23a':m.modelo==='Regresión Ridge'?'#5fd4c4':'#6c7465')}], xFmt:v=>fmt.pct(v,1)});
+    DC.line($('#ch-err'), {labels:Array.from({length:24},(_,h)=>h+'h'), yMin:0, series:[{name:'Gradient boosting', data:D.por_hora.modelo, color:'#c5f23a'},{name:L('Igual que la semana pasada','Same as last week'), data:D.por_hora.base, color:'#f2c14e', dash:true}], tipFmt:v=>fmt.int(v)+L(' viajes',' trips')});
+    escRender();
+    DC.bars($('#ch-imp'), {horizontal:true, labels:D.importancia.map(r=>L(r.variable,VAR[r.variable]||r.variable)), labelW:180, series:[{name:'', data:D.importancia.map(r=>Math.max(0,r.valor)), color:'#c5f23a'}], xFmt:v=>fmt.int(v)});
+    DC.bars($('#ch-lluvia'), {labels:D.lluvia.labels.map(l=>L(l,LLU[l])), labelGap:80, yMax:1.2, series:[{name:L('Demanda relativa','Relative demand'), data:D.lluvia.valores, colors:['#c5f23a','#5fd4c4','#f2c14e','#e86f5a']}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,0)});
+    DC.line($('#ch-temp'), {labels:D.temp.labels, yMin:.4, yMax:1.2, series:[{name:L('Demanda relativa','Relative demand'), data:D.temp.valores, color:'#c5f23a'}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,0)});
+    DC.line($('#ch-dia'), {labels:D.diario.fechas.map(f=>f.slice(5,7)+'/'+f.slice(2,4)), yMin:0, series:[{name:L('Viajes del día (muestra semanal)','Daily trips (weekly sample)'), data:D.diario.viajes, color:'#3a4234', width:1.2},{name:L('Media móvil 28 días','28-day moving average'), data:D.diario.media, color:'#c5f23a', width:2.4}], yFmt:v=>(v/1000).toFixed(0)+'k', tipFmt:v=>fmt.int(v)});
+
+    const C = D.calendario;
+    const F = L([
+      ['Dos usos muy distintos',`Días hábiles: ~${fmt.int(C['Día hábil'])} viajes con picos a las 8 y 18 h. Fines de semana y feriados: la mitad, de tarde.`],
+      ['El clima manda','Con lluvia fuerte la demanda cae al 34% de lo normal; bajo 8 °C, un 38%.'],
+      ['El modelo le gana a la regla simple','WAPE de 16% contra 26% de "igual que la semana pasada": un 39% menos de error en 4 meses no vistos.'],
+      ['Un modelo lineal no alcanza','La regresión Ridge no mejora al baseline: los efectos de clima y horario se multiplican.'],
+      ['La ventaja aparece cuando llueve','Con lluvia fuerte: 19% de error del modelo contra 169% del baseline, que espera una semana seca.'],
+    ],[
+      ['Two very different uses',`Weekdays: ~${fmt.int(C['Día hábil'])} trips peaking at 8 am and 6 pm. Weekends and holidays: half that, in the afternoon.`],
+      ['Weather rules','In heavy rain demand drops to 34% of normal; below 8 °C, by 38%.'],
+      ['The model beats the simple rule','WAPE of 16% vs 26% for "same as last week": 39% less error over 4 unseen months.'],
+      ['A linear model isn\'t enough','Ridge regression doesn\'t beat the baseline: weather and time-of-day effects multiply.'],
+      ['The edge shows when it rains','In heavy rain: 19% model error vs 169% for the baseline, which expects a dry week.'],
+    ]);
+    $('#finds').innerHTML = F.map((f,i)=>`<div class="find"><i>0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const R = L([
+      ['Redistribución con el pronóstico de mañana','Menos camiones y personal los días de lluvia o frío; refuerzo en los picos de días hábiles.'],
+      ['Alertas por clima en hora pico','Avisar con un día de anticipación cuando se espere lluvia a las 8 o a las 18 h.'],
+      ['Mantenimiento en horas valle','Programar arreglos en madrugada, invierno y vacaciones de enero.'],
+      ['Próximo paso: pronóstico por estación','Decidir dónde llevar las bicis, con intervalos de predicción para planificar con margen.'],
+    ],[
+      ['Rebalance with tomorrow\'s forecast','Fewer trucks and staff on rainy or cold days; extra capacity at weekday peaks.'],
+      ['Weather alerts at peak hours','Warn a day ahead when rain is expected at 8 am or 6 pm.'],
+      ['Maintenance in off-peak hours','Schedule repairs overnight, in winter and during January holidays.'],
+      ['Next step: per-station forecast','Decide where to move bikes, with prediction intervals to plan with a safety margin.'],
+    ]);
+    $('#recs').innerHTML = R.map((f,i)=>`<div class="find rec"><i>→ 0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const MT = L([
+      ['Datos','<b>Simulados</b>, inspirados en EcoBici: viajes por hora y clima, ene 2024 – dic 2025, con feriados argentinos reales.'],
+      ['Partición temporal','Entrenamiento hasta ago 2025; prueba sep–dic 2025. Las variables solo usan información disponible el día anterior.'],
+      ['Variables','Hora, día, mes, feriado, vacaciones, temperatura, lluvia, humedad, viento, misma hora de la semana anterior y promedio de 7 días.'],
+      ['Modelos','Dos baselines, regresión Ridge con splines y <b>HistGradientBoosting</b> con pérdida de Poisson (conteos).'],
+      ['Métricas','MAE, RMSE y WAPE (error total como % de la demanda), más análisis del error por hora y por lluvia.'],
+    ],[
+      ['Data','<b>Simulated</b>, inspired by EcoBici: hourly trips and weather, Jan 2024 – Dec 2025, with real Argentine holidays.'],
+      ['Time-based split','Train through Aug 2025; test Sep–Dec 2025. Features only use information available the day before.'],
+      ['Features','Hour, day, month, holiday, vacation, temperature, rain, humidity, wind, same hour last week and 7-day average.'],
+      ['Models','Two baselines, Ridge regression with splines and <b>HistGradientBoosting</b> with Poisson loss (counts).'],
+      ['Metrics','MAE, RMSE and WAPE (total error as % of demand), plus error analysis by hour and by rainfall.'],
+    ]);
+    $('#method').innerHTML = MT.map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+  }
+  document.querySelectorAll('#seg-esc button').forEach(b=>b.addEventListener('click',()=>{ esc=b.dataset.v; document.querySelectorAll('#seg-esc button').forEach(x=>x.setAttribute('aria-pressed',x===b)); escRender(); }));
+  document.addEventListener('langchange', render);
+})();
+</script>
+</body>
+</html>

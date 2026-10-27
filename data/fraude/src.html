@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fintech: detección de fraude — Mateo Taylor</title>
+<meta name="title-en" content="Fintech: fraud detection — Mateo Taylor">
+<meta name="description" content="Modelo de machine learning para detectar fraude en pagos con tarjeta, con umbral optimizado por costo. Proyecto de Mateo Taylor.">
+<meta name="theme-color" content="#0c0e0b">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dash.css">
+<style>.thr-out{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 14px}@media (max-width:900px){.thr-out{grid-template-columns:1fr 1fr}}</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="crumb"><a href="https://www.taylorsportafolio.com/"><b>&lt;/&gt;</b> Mateo Taylor</a><small>/ <a href="../">DATA</a> / [[FRAUDE¦FRAUD]]</small></div>
+  <div class="lang" role="group" aria-label="Idioma"><button data-lang="es" aria-pressed="true">ES</button>/<button data-lang="en" aria-pressed="false">EN</button></div>
+</div></div>
+
+<main class="wrap">
+<header class="hd">
+  <p class="kick"><b>03 · Data Scientist</b><span>Fintech · [[Clasificación¦Classification]] · [[Machine learning¦Machine learning]]</span></p>
+  <h1>[[Detectar más fraude con menos alertas¦Catch more fraud with fewer alerts]]</h1>
+  <p class="sub">[[Un modelo de machine learning para pagos con tarjeta que reemplaza una regla fija. La clave no es solo el modelo: es decidir cuándo alertar según lo que cuesta cada error.¦A machine-learning model for card payments that replaces a fixed rule. The key isn't just the model: it's deciding when to alert based on what each mistake costs.]]</p>
+  <div class="hd-row">
+    <a class="btn pri" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/03-fintech-fraude/analisis.ipynb" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg>[[Ver notebook¦View notebook]]</a>
+    <a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data/projects/03-fintech-fraude" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>[[Código y datos¦Code & data]]</a>
+    <span class="note">[[Datos simulados¦Simulated data]]</span>
+  </div>
+  <div class="stack"><span>Python</span><span>scikit-learn</span><span>Gradient boosting</span><span>[[Clases desbalanceadas¦Imbalanced classes]]</span><span>[[Calibración¦Calibration]]</span><span>[[Decisión por costo¦Cost-based decisions]]</span></div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="grid">
+  <article class="card w7">
+    <h2>[[Precisión vs. recall en junio (datos nunca vistos)¦Precision vs. recall in June (unseen data)]]</h2>
+    <p class="cap">[[Qué % de las alertas son fraude (precisión) para cada % de fraudes detectados (recall).¦What % of alerts are fraud (precision) for each % of frauds caught (recall).]]</p>
+    <div id="ch-pr" data-h="300"></div>
+  </article>
+  <article class="card w5">
+    <h2>[[Costo total de junio¦Total cost in June]]</h2>
+    <p class="cap">[[Fraude no detectado + revisión de alertas + fricción con clientes legítimos.¦Missed fraud + alert review + friction with legitimate customers.]]</p>
+    <div id="ch-cost"></div>
+    <div class="tw"><table class="dt" id="tb-comp"></table></div>
+  </article>
+
+  <article class="card w12">
+    <h2>[[Explorá el umbral de alerta¦Explore the alert threshold]]</h2>
+    <p class="cap">[[Con un umbral único por probabilidad, subirlo da alertas más precisas pero deja pasar más fraude. La decisión por pérdida esperada (línea punteada) le gana a cualquier umbral fijo.¦With a single probability threshold, raising it makes alerts more precise but lets more fraud through. The expected-loss decision (dashed line) beats any fixed threshold.]]</p>
+    <div class="slider"><label for="thr">[[Umbral¦Threshold]]</label><input type="range" id="thr" min="0" max="0" step="1"><output id="thr-o"></output></div>
+    <div class="thr-out kpis" id="thr-k"></div>
+    <div id="ch-thr" data-h="250"></div>
+  </article>
+
+  <article class="card">
+    <h2>[[Tasa de fraude por hora¦Fraud rate by hour]]</h2>
+    <p class="cap">[[La madrugada concentra el doble de riesgo.¦Late-night hours carry twice the risk.]]</p>
+    <div id="ch-hora" data-h="220"></div>
+  </article>
+  <article class="card">
+    <h2>[[Tasa de fraude por monto¦Fraud rate by amount]]</h2>
+    <p class="cap">[[Extremos: micro-cargos de prueba y montos altos.¦The extremes: test micro-charges and high amounts.]]</p>
+    <div id="ch-monto" data-h="220"></div>
+  </article>
+  <article class="card">
+    <h2>[[Tasa de fraude por rubro¦Fraud rate by merchant category]]</h2>
+    <div id="ch-rubro"></div>
+  </article>
+  <article class="card">
+    <h2>[[¿Qué mira el modelo?¦What does the model look at?]]</h2>
+    <p class="cap">[[Importancia por permutación: cuánto cae la PR-AUC si se mezcla cada variable.¦Permutation importance: how much PR-AUC drops when each variable is shuffled.]]</p>
+    <div id="ch-imp"></div>
+  </article>
+</section>
+
+<section class="sec"><p class="sec-t"><b>01</b>[[Hallazgos¦Findings]]</p><div class="finds" id="finds"></div></section>
+<section class="sec"><p class="sec-t"><b>02</b>[[Recomendaciones¦Recommendations]]</p><div class="finds" id="recs"></div></section>
+<section class="sec"><p class="sec-t"><b>03</b>[[Metodología¦Methodology]]</p><dl class="method" id="method"></dl></section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Mateo Taylor · <a href="https://www.taylorsportafolio.com/">taylorsportafolio.com</a></span><span>[[Gráficos propios en SVG, sin librerías externas.¦Custom SVG charts, no external libraries.]]</span></div></footer>
+
+<script>/*DATA*/</script>
+<script src="../assets/charts.js"></script>
+<script src="../assets/dash.js"></script>
+<script>
+(function(){
+  const D = window.DATA, $ = s => document.querySelector(s), CP = D.comparacion, CV = D.curva;
+  const MOD = {'Regla actual':['Regla actual','Current rule'],'Regresión logística':['Regresión logística','Logistic regression'],'Random forest':['Random forest','Random forest'],'Gradient boosting':['Gradient boosting','Gradient boosting']};
+  const RUB = {'Viajes':'Travel','Electrónica':'Electronics','E-commerce':'E-commerce','Billeteras / recargas':'Wallets / top-ups','Indumentaria':'Clothing','Suscripciones digitales':'Digital subscriptions','Combustible':'Fuel','Gastronomía':'Restaurants','Supermercado':'Supermarket'};
+  const VAR = {'Transacciones en 24 h':'Transactions in 24 h','Rubro del comercio':'Merchant category','Micro-cargo':'Micro-charge','Monto vs. gasto habitual':'Amount vs. usual spend','Hora':'Hour','Monto':'Amount','Gasto medio 30 días':'30-day average spend','Dispositivo nuevo':'New device','Madrugada':'Late night','Intentos fallidos previos':'Previous failed attempts','Internacional':'International','Antigüedad de la cuenta':'Account age','Distancia al domicilio':'Distance from home','Cuenta nueva':'New account','Lejos de casa':'Far from home','Edad del titular':'Cardholder age','Canal':'Channel'};
+  const kpi = (l,v,n) => `<div class="kpi"><span>${l}</span><strong>${v}</strong>${n?`<small>${n}</small>`:''}</div>`;
+  const thr = $('#thr'); thr.max = CV.umbral.length - 1;
+  thr.value = CV.umbral.findIndex(u => Math.abs(u - .2) < 1e-6);
+
+  function thrUpdate(){
+    const i = +thr.value;
+    $('#thr-o').textContent = fmt.dec(CV.umbral[i], CV.umbral[i] < .01 ? 3 : 2);
+    $('#thr-k').innerHTML = kpi(L('Alertas','Alerts'), fmt.int(CV.alertas[i]), L('regla: ','rule: ')+fmt.int(CP.regla.alertas)) +
+      kpi(L('Precisión','Precision'), fmt.pct(CV.precision[i],0), L('% de alertas que son fraude','% of alerts that are fraud')) +
+      kpi('Recall', fmt.pct(CV.recall[i],0), L('% de fraudes detectados','% of frauds caught')) +
+      kpi(L('Monto detectado','Amount caught'), fmt.usd(CV.monto_detectado[i]), L('de ','of ')+fmt.usd(CP.nada.monto_perdido)) +
+      kpi(L('Costo total','Total cost'), fmt.usd(CV.costo_total[i]), (CV.costo_total[i] > CP.modelo.costo_total ? '<b class="neg">+' + fmt.usd(CV.costo_total[i]-CP.modelo.costo_total) + '</b> ' + L('vs pérdida esperada','vs expected loss') : ''));
+  }
+
+  function render(){
+    const M = D.test_metricas, ahorro = CP.regla.costo_total - CP.modelo.costo_total;
+    $('#kpis').innerHTML =
+      kpi(L('Transacciones con fraude','Fraudulent transactions'), fmt.pct(D.base.tasa,2), fmt.int(D.base.fraudes)+L(' de ',' of ')+fmt.int(D.base.n)) +
+      kpi('PR-AUC', fmt.dec(M.ap,2), L('regla actual: ','current rule: ')+fmt.dec(D.pr['Regla actual'].ap,2)) +
+      kpi(L('Ahorro vs. regla','Savings vs. rule'), '−'+fmt.pct(ahorro/CP.regla.costo_total,0), fmt.usd(ahorro)+L(' en junio',' in June')) +
+      kpi(L('Fraude detectado','Fraud caught'), fmt.pct(CP.modelo['%_monto_detectado'],0)+L(' del monto',' of value'), fmt.pct(CP.modelo.recall,0)+L(' de los casos (regla: ',' of cases (rule: ')+fmt.pct(CP.regla.recall,0)+')') +
+      kpi(L('Precisión de alertas','Alert precision'), fmt.pct(CP.modelo.precision,0), L('regla: ','rule: ')+fmt.pct(CP.regla.precision,0)+L(' · menos falsos bloqueos',' · fewer false blocks'));
+
+    // PR curves interpolated on a recall grid
+    const grid = Array.from({length:51},(_,k)=>k/50);
+    const cols = {'Regla actual':'#e86f5a','Regresión logística':'#5fd4c4','Random forest':'#f2c14e','Gradient boosting':'#c5f23a'};
+    const ser = Object.entries(D.pr).map(([n,c])=>({name:L(...MOD[n])+' · '+fmt.dec(c.ap,2), color:cols[n], dash:n==='Regla actual', width:n==='Gradient boosting'?2.6:1.6,
+      data:grid.map(r=>{ let best=null; c.r.forEach((rv,i)=>{ if(rv>=r-1e-9) best = best==null? c.p[i] : Math.max(best,c.p[i]); }); return best; })}));
+    DC.line($('#ch-pr'), {labels:grid.map(r=>Math.round(r*100)+'%'), yMin:0, yMax:1, series:ser, yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,0)});
+
+    const rows = [['nada',L('Sin control','No control'),'#e86f5a'],['regla',L('Regla actual','Current rule'),'#f2c14e'],['umbral',L('Modelo · umbral único','Model · single threshold'),'#5fd4c4'],['modelo',L('Modelo · pérdida esperada','Model · expected loss'),'#c5f23a']];
+    DC.bars($('#ch-cost'), {horizontal:true, labels:rows.map(r=>r[1]), labelW:176, series:[{name:'', data:rows.map(r=>CP[r[0]].costo_total), colors:rows.map(r=>r[2])}], xFmt:v=>fmt.usdk(v), tipFmt:fmt.usd});
+    $('#tb-comp').innerHTML = `<thead><tr><th></th><th class="num">${L('Alertas','Alerts')}</th><th class="num">Recall</th><th class="num">${L('Precisión','Precision')}</th></tr></thead><tbody>` +
+      rows.slice(1).map(r=>`<tr><td>${r[1]}</td><td class="num">${fmt.int(CP[r[0]].alertas)}</td><td class="num">${fmt.pct(CP[r[0]].recall,0)}</td><td class="num">${fmt.pct(CP[r[0]].precision,0)}</td></tr>`).join('')+'</tbody>';
+
+    DC.line($('#ch-thr'), {labels:CV.umbral.map(u=>fmt.dec(u,u<.01?3:2)), series:[
+      {name:L('Costo con umbral único','Cost with single threshold'), data:CV.costo_total, color:'#5fd4c4'},
+      {name:L('Pérdida esperada','Expected loss'), data:CV.umbral.map(()=>CP.modelo.costo_total), color:'#c5f23a', dash:true},
+      {name:L('Regla actual','Current rule'), data:CV.umbral.map(()=>CP.regla.costo_total), color:'#f2c14e', dash:true}],
+      yMin:0, yFmt:v=>'$'+(v/1000).toFixed(0)+'k', tipFmt:fmt.usd});
+    thrUpdate();
+
+    DC.bars($('#ch-hora'), {labels:D.hora.map((_,h)=>String(h)), series:[{name:L('Tasa de fraude','Fraud rate'), data:D.hora, colors:D.hora.map((_,h)=>h<6?'#e86f5a':'#3a4234')}], yFmt:v=>fmt.pct(v,1), tipFmt:v=>fmt.pct(v,2)});
+    DC.bars($('#ch-monto'), {labels:D.tramos.labels, labelGap:44, series:[{name:L('Tasa de fraude','Fraud rate'), data:D.tramos.tasa, colors:D.tramos.tasa.map(v=>v>.02?'#e86f5a':'#3a4234')}], yFmt:v=>fmt.pct(v,0), tipFmt:v=>fmt.pct(v,2)});
+    DC.bars($('#ch-rubro'), {horizontal:true, labels:D.rubro.map(r=>L(r.rubro,RUB[r.rubro])), labelW:160, series:[{name:'', data:D.rubro.map(r=>r.tasa), colors:D.rubro.map(r=>r.tasa>.02?'#e86f5a':'#6c7465')}], xFmt:v=>fmt.pct(v,1)});
+    DC.bars($('#ch-imp'), {horizontal:true, labels:D.importancia.map(r=>L(r.variable,VAR[r.variable]||r.variable)), labelW:170, series:[{name:'', data:D.importancia.map(r=>Math.max(0,r.importancia)), color:'#c5f23a'}], xFmt:v=>fmt.dec(v,3)});
+
+    const F = L([
+      ['La regla actual casi no ordena el riesgo','PR-AUC 0,03: marca todo lo que supera US$ 300 y deja pasar el 61% de los fraudes.'],
+      ['Gradient boosting gana','PR-AUC 0,57 y ROC-AUC 0,96 en un mes que nunca vio, con probabilidades bien calibradas.'],
+      ['El umbral importa tanto como el modelo','Con un umbral único el ahorro es de 8%; decidiendo por pérdida esperada, de 24% (~US$ 42.000 al año).'],
+      ['Alertas el doble de precisas','15% de las alertas son fraude (regla: 7%): menos clientes bloqueados sin motivo.'],
+      ['Las ráfagas delatan el fraude','6 o más transacciones en 24 horas multiplican por 16 la tasa de fraude; los micro-cargos de prueba son el 19% de los casos.'],
+    ],[
+      ['The current rule barely ranks risk','PR-AUC 0.03: it flags everything above US$ 300 and lets 61% of frauds through.'],
+      ['Gradient boosting wins','PR-AUC 0.57 and ROC-AUC 0.96 on a month it never saw, with well-calibrated probabilities.'],
+      ['The threshold matters as much as the model','A single threshold saves 8%; deciding by expected loss saves 24% (~US$ 42,000 a year).'],
+      ['Alerts twice as precise','15% of alerts are fraud (rule: 7%): fewer customers blocked for no reason.'],
+      ['Bursts give fraud away','6+ transactions in 24 hours multiply the fraud rate by 16; test micro-charges are 19% of cases.'],
+    ]);
+    $('#finds').innerHTML = F.map((f,i)=>`<div class="find"><i>0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const R = L([
+      ['Pasar el modelo a producción en modo sombra','2 a 4 semanas puntuando sin bloquear, para confirmar el ahorro con datos reales.'],
+      ['Bloqueo automático de ráfagas','Ráfagas con micro-cargos: el patrón más claro de prueba de tarjetas robadas.'],
+      ['Monitoreo mensual','PR-AUC, calibración y deriva de variables; reentrenar cuando el fraude cambie de táctica.'],
+      ['Validar los costos con negocio','El criterio de alerta se ajusta solo si cambia el costo de revisar o de la fricción.'],
+    ],[
+      ['Deploy in shadow mode','2–4 weeks scoring without blocking, to confirm the savings on real data.'],
+      ['Auto-block bursts','Bursts with micro-charges: the clearest pattern of stolen-card testing.'],
+      ['Monthly monitoring','PR-AUC, calibration and feature drift; retrain when fraud changes tactics.'],
+      ['Validate costs with the business','The alert criterion adjusts automatically if review or friction costs change.'],
+    ]);
+    $('#recs').innerHTML = R.map((f,i)=>`<div class="find rec"><i>→ 0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const c = D.costos;
+    const MT = L([
+      ['Datos',`<b>Simulados:</b> ${fmt.int(D.base.n)} transacciones de ene–jun 2025 con ${fmt.pct(D.base.tasa,1)} de fraude.`],
+      ['Partición temporal','Entrenamiento ene–abr, validación may (modelo y umbral), prueba jun (una sola evaluación).'],
+      ['Modelos','Regla actual vs. regresión logística, random forest y <b>HistGradientBoosting</b> (scikit-learn).'],
+      ['Métrica','PR-AUC (precisión promedio): adecuada para clases muy desbalanceadas, a diferencia del accuracy.'],
+      ['Costos',`Fraude perdido: monto + US$ ${c.gestion}. Revisión: US$ ${c.revision} por alerta. Fricción: US$ ${c.friccion} por falso positivo.`],
+      ['Decisión','Alertar si p·(monto+15) > 3 + (1−p)·5. Requiere probabilidades calibradas: verificado en validación.'],
+    ],[
+      ['Data',`<b>Simulated:</b> ${fmt.int(D.base.n)} transactions, Jan–Jun 2025, with ${fmt.pct(D.base.tasa,1)} fraud.`],
+      ['Time-based split','Train Jan–Apr, validation May (model & threshold), test June (evaluated once).'],
+      ['Models','Current rule vs. logistic regression, random forest and <b>HistGradientBoosting</b> (scikit-learn).'],
+      ['Metric','PR-AUC (average precision): suited to highly imbalanced classes, unlike accuracy.'],
+      ['Costs',`Missed fraud: amount + US$ ${c.gestion}. Review: US$ ${c.revision} per alert. Friction: US$ ${c.friccion} per false positive.`],
+      ['Decision','Alert if p·(amount+15) > 3 + (1−p)·5. Requires calibrated probabilities: verified on validation.'],
+    ]);
+    $('#method').innerHTML = MT.map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+  }
+  thr.addEventListener('input', thrUpdate);
+  document.addEventListener('langchange', render);
+})();
+</script>
+</body>
+</html>

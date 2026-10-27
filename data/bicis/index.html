@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bicis públicas: pronóstico de demanda — Mateo Taylor</title>
+<meta name="title-en" content="Bike share: demand forecasting — Mateo Taylor">
+<meta name="description" content="Pronóstico horario de demanda de bicicletas públicas en Buenos Aires con clima y calendario. Proyecto de Mateo Taylor.">
+<meta name="theme-color" content="#0c0e0b">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dash.css">
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="crumb"><a href="https://www.taylorsportafolio.com/"><b>&lt;/&gt;</b> Mateo Taylor</a><small>/ <a href="../">DATA</a> / <x-t data-en="BIKE SHARE">BICIS</x-t></small></div>
+  <div class="lang" role="group" aria-label="Idioma"><button data-lang="es" aria-pressed="true">ES</button>/<button data-lang="en" aria-pressed="false">EN</button></div>
+</div></div>
+
+<main class="wrap">
+<header class="hd">
+  <p class="kick"><b>04 · Data Scientist</b><span><x-t data-en="Transport">Transporte</x-t> · <x-t data-en="Time series">Series de tiempo</x-t> · <x-t data-en="Forecasting">Pronóstico</x-t></span></p>
+  <h1><x-t data-en="How many bikes will be used tomorrow?">¿Cuántas bicis se van a usar mañana?</x-t></h1>
+  <p class="sub"><x-t data-en="An hour-by-hour demand forecast for a Buenos Aires bike-share system, using the calendar and weather, to plan rebalancing and staff shifts one day ahead.">Pronóstico hora por hora de la demanda de un sistema de bicicletas públicas en Buenos Aires, con calendario y clima, para planificar la redistribución y los turnos con un día de anticipación.</x-t></p>
+  <div class="hd-row">
+    <a class="btn pri" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/04-transporte-bicis/analisis.ipynb" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg><x-t data-en="View notebook">Ver notebook</x-t></a>
+    <a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data/projects/04-transporte-bicis" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg><x-t data-en="Code &amp; data">Código y datos</x-t></a>
+    <span class="note"><x-t data-en="Simulated data">Datos simulados</x-t></span>
+  </div>
+  <div class="stack"><span>Python</span><span>pandas</span><span>scikit-learn</span><span>Gradient boosting (Poisson)</span><span><x-t data-en="Time-based validation">Validación temporal</x-t></span><span><x-t data-en="Scenarios">Escenarios</x-t></span></div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="grid">
+  <article class="card w12">
+    <h2><x-t data-en="Average trips by hour and weekday">Viajes promedio por hora y día de la semana</x-t></h2>
+    <p class="cap"><x-t data-en="Weekdays: commute peaks. Weekends: leisure riding in the afternoon.">Días hábiles: picos de ida y vuelta al trabajo. Fines de semana: uso recreativo de tarde.</x-t></p>
+    <div class="tw"><div id="ch-mapa" style="min-width:640px"></div></div>
+  </article>
+
+  <article class="card w12">
+    <h2><x-t data-en="A test week: actual vs. forecast">Una semana de prueba: real vs. pronóstico</x-t></h2>
+    <p class="cap" id="cap-sem"></p>
+    <div id="ch-sem" data-h="280"></div>
+  </article>
+
+  <article class="card">
+    <h2><x-t data-en="Total error by method (Sep–Dec 2025)">Error total por método (sep–dic 2025)</x-t></h2>
+    <p class="cap"><x-t data-en="WAPE: total absolute error as a % of demand. Lower is better.">WAPE: error absoluto total como % de la demanda. Menor es mejor.</x-t></p>
+    <div id="ch-mod"></div>
+  </article>
+  <article class="card">
+    <h2><x-t data-en="Mean error by hour of day">Error medio por hora del día</x-t></h2>
+    <p class="cap"><x-t data-en="The model cuts error right at the peaks, where it matters most.">El modelo reduce el error justo en los picos, donde más importa.</x-t></p>
+    <div id="ch-err" data-h="220"></div>
+  </article>
+
+  <article class="card w7">
+    <h2><x-t data-en="Scenario: what if it rains in the afternoon?">Escenario: ¿y si llueve a la tarde?</x-t></h2>
+    <p class="cap"><x-t data-en="Forecast for a Wednesday in October, dry vs. rain from 2 to 9 pm.">Pronóstico de un miércoles de octubre, seco vs. con lluvia de 14 a 21 h.</x-t></p>
+    <div class="ctl"><div class="seg" id="seg-esc"><button data-v="llovizna" aria-pressed="false"><x-t data-en="Drizzle">Llovizna</x-t></button><button data-v="moderada" aria-pressed="true"><x-t data-en="Moderate">Moderada</x-t></button><button data-v="fuerte" aria-pressed="false"><x-t data-en="Heavy">Fuerte</x-t></button></div></div>
+    <div id="ch-esc" data-h="240"></div>
+    <div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 0" id="esc-k"></div>
+  </article>
+  <article class="card w5">
+    <h2><x-t data-en="What does the model look at?">¿Qué mira el modelo?</x-t></h2>
+    <p class="cap"><x-t data-en="Increase in error (trips/hour) when each variable is shuffled.">Aumento del error (viajes/hora) al mezclar cada variable.</x-t></p>
+    <div id="ch-imp"></div>
+  </article>
+
+  <article class="card">
+    <h2><x-t data-en="Relative demand by rainfall">Demanda relativa según la lluvia</x-t></h2>
+    <p class="cap"><x-t data-en="Versus equivalent hours (same day type and time slot).">Frente a horas equivalentes (mismo tipo de día y franja).</x-t></p>
+    <div id="ch-lluvia" data-h="210"></div>
+  </article>
+  <article class="card">
+    <h2><x-t data-en="Relative demand by temperature">Demanda relativa según la temperatura</x-t></h2>
+    <p class="cap"><x-t data-en="Optimal between 16 and 28 °C; demand drops sharply in the cold.">Óptimo entre 16 y 28 °C; con frío la demanda cae fuerte.</x-t></p>
+    <div id="ch-temp" data-h="210"></div>
+  </article>
+
+  <article class="card w12">
+    <h2><x-t data-en="Trips per day, 2024–2025">Viajes por día, 2024–2025</x-t></h2>
+    <p class="cap"><x-t data-en="Seasonality (low in winter) and system growth, with a jump after the July 2025 expansion.">Estacionalidad (invierno bajo) y crecimiento del sistema, con un salto tras la ampliación de julio 2025.</x-t></p>
+    <div id="ch-dia" data-h="230"></div>
+  </article>
+</section>
+
+<section class="sec"><p class="sec-t"><b>01</b><x-t data-en="Findings">Hallazgos</x-t></p><div class="finds" id="finds"></div></section>
+<section class="sec"><p class="sec-t"><b>02</b><x-t data-en="How operations would use it">Cómo lo usaría la operación</x-t></p><div class="finds" id="recs"></div></section>
+<section class="sec"><p class="sec-t"><b>03</b><x-t data-en="Methodology">Metodología</x-t></p><dl class="method" id="method"></dl></section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Mateo Taylor · <a href="https://www.taylorsportafolio.com/">taylorsportafolio.com</a></span><span><x-t data-en="Custom SVG charts, no external libraries.">Gráficos propios en SVG, sin librerías externas.</x-t></span></div></footer>
+
+<script>window.DATA = {"kpis": {"viajes_dia": 25329.68946648427, "crec": 0.1217067200431583, "pico": 3132.714285714286, "lluvia_fuerte": 0.34304798564843375, "perdida_escenario": 0.2711622164818399}, "mapa": {"valores": [[102.0, 103.0, 102.0, 99.0, 100.0, 114.0, 279.0, 1545.0, 2448.0, 2107.0, 1430.0, 1345.0, 1623.0, 1840.0, 1707.0, 1460.0, 1508.0, 2242.0, 3015.0, 2558.0, 1581.0, 927.0, 136.0, 110.0], [102.0, 98.0, 98.0, 96.0, 97.0, 117.0, 302.0, 1580.0, 2572.0, 2206.0, 1441.0, 1406.0, 1624.0, 1836.0, 1730.0, 1440.0, 1566.0, 2310.0, 3133.0, 2800.0, 1660.0, 963.0, 140.0, 108.0], [105.0, 105.0, 104.0, 100.0, 102.0, 115.0, 290.0, 1609.0, 2488.0, 2177.0, 1433.0, 1318.0, 1620.0, 1819.0, 1668.0, 1377.0, 1468.0, 2271.0, 3127.0, 2797.0, 1651.0, 1015.0, 137.0, 110.0], [105.0, 104.0, 100.0, 98.0, 101.0, 118.0, 293.0, 1594.0, 2522.0, 2150.0, 1407.0, 1352.0, 1637.0, 1817.0, 1673.0, 1426.0, 1544.0, 2248.0, 3122.0, 2747.0, 1687.0, 985.0, 133.0, 109.0], [102.0, 101.0, 101.0, 101.0, 101.0, 117.0, 285.0, 1621.0, 2462.0, 2227.0, 1426.0, 1347.0, 1633.0, 1772.0, 1664.0, 1430.0, 1509.0, 2207.0, 2950.0, 3020.0, 1773.0, 1032.0, 149.0, 122.0], [70.0, 70.0, 69.0, 67.0, 69.0, 69.0, 80.0, 96.0, 126.0, 405.0, 568.0, 859.0, 1238.0, 1599.0, 1935.0, 2109.0, 1879.0, 1572.0, 1205.0, 827.0, 564.0, 396.0, 124.0, 87.0], [70.0, 68.0, 68.0, 67.0, 66.0, 70.0, 75.0, 89.0, 122.0, 390.0, 535.0, 805.0, 1176.0, 1647.0, 1942.0, 2014.0, 1892.0, 1573.0, 1219.0, 823.0, 558.0, 393.0, 129.0, 91.0]]}, "diario": {"fechas": ["2024-01-01", "2024-01-08", "2024-01-15", "2024-01-22", "2024-01-29", "2024-02-05", "2024-02-12", "2024-02-19", "2024-02-26", "2024-03-04", "2024-03-11", "2024-03-18", "2024-03-25", "2024-04-01", "2024-04-08", "2024-04-15", "2024-04-22", "2024-04-29", "2024-05-06", "2024-05-13", "2024-05-20", "2024-05-27", "2024-06-03", "2024-06-10", "2024-06-17", "2024-06-24", "2024-07-01", "2024-07-08", "2024-07-15", "2024-07-22", "2024-07-29", "2024-08-05", "2024-08-12", "2024-08-19", "2024-08-26", "2024-09-02", "2024-09-09", "2024-09-16", "2024-09-23", "2024-09-30", "2024-10-07", "2024-10-14", "2024-10-21", "2024-10-28", "2024-11-04", "2024-11-11", "2024-11-18", "2024-11-25", "2024-12-02", "2024-12-09", "2024-12-16", "2024-12-23", "2024-12-30", "2025-01-06", "2025-01-13", "2025-01-20", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-04-21", "2025-04-28", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-11", "2025-08-18", "2025-08-25", "2025-09-01", "2025-09-08", "2025-09-15", "2025-09-22", "2025-09-29", "2025-10-06", "2025-10-13", "2025-10-20", "2025-10-27", "2025-11-03", "2025-11-10", "2025-11-17", "2025-11-24", "2025-12-01", "2025-12-08", "2025-12-15", "2025-12-22", "2025-12-29"], "media": [null, null, 20521.0, 21361.0, 22287.0, 22787.0, 23941.0, 24144.0, 24641.0, 25472.0, 25405.0, 25288.0, 24860.0, 24772.0, 24782.0, 25566.0, 25075.0, 24877.0, 24497.0, 23666.0, 23717.0, 23180.0, 22818.0, 21231.0, 20433.0, 20079.0, 18983.0, 18927.0, 18448.0, 18527.0, 19133.0, 20865.0, 21962.0, 21767.0, 22433.0, 22434.0, 22989.0, 24436.0, 25217.0, 25582.0, 26235.0, 26501.0, 26595.0, 27453.0, 27977.0, 27623.0, 28038.0, 28028.0, 27794.0, 27892.0, 27043.0, 25603.0, 24260.0, 23339.0, 22571.0, 22913.0, 24088.0, 24966.0, 26115.0, 27305.0, 26402.0, 27446.0, 27641.0, 27457.0, 28086.0, 27866.0, 26863.0, 27400.0, 26650.0, 26066.0, 26101.0, 25068.0, 25633.0, 24513.0, 24034.0, 22626.0, 21896.0, 21778.0, 22017.0, 22871.0, 23092.0, 23580.0, 23659.0, 23767.0, 24498.0, 25039.0, 26050.0, 27132.0, 27503.0, 28241.0, 29320.0, 29715.0, 31035.0, 31929.0, 32027.0, 32844.0, 32605.0, 31741.0, 31586.0, 31344.0, 30814.0, 30576.0, 30118.0, null, null], "viajes": [14414, 23780, 23511, 26898, 23540, 26806, 15524, 28475, 30884, 29882, 30998, 27096, 31555, 32941, 27031, 33532, 30268, 28015, 30933, 27035, 27693, 27292, 28924, 26028, 12946, 13701, 22811, 25306, 19414, 18511, 23511, 25617, 25959, 25278, 17307, 26323, 25381, 27871, 32261, 30792, 29656, 31882, 32184, 34960, 31297, 34840, 16826, 32599, 32113, 31389, 23018, 34227, 31256, 26502, 25743, 19643, 27193, 34113, 33659, 31157, 30937, 17642, 37855, 17211, 17391, 37116, 34559, 33342, 34451, 33879, 30864, 31442, 31013, 28197, 28608, 26807, 15812, 25510, 23897, 30981, 25643, 29070, 24655, 24564, 29597, 28219, 30440, 33002, 31781, 32744, 34243, 36019, 35786, 37095, 38187, 38194, 39496, 39218, 39801, 21538, 31020, 19682, 36820, 35150, 30779]}, "lluvia": {"labels": ["sin lluvia", "llovizna (≤1 mm)", "moderada (1–5 mm)", "fuerte (>5 mm)"], "valores": [1.0344, 0.7469, 0.6144, 0.343]}, "temp": {"labels": ["< 8°", "8–12°", "12–16°", "16–20°", "20–24°", "24–28°", "> 28°"], "valores": [0.6159, 0.7615, 0.953, 1.1154, 1.1382, 1.1203, 0.9245]}, "modelos": [{"modelo": "Gradient boosting", "MAE": 204.74995584546238, "RMSE": 350.8669709203322, "WAPE": 0.16015294090247437, "mejora vs. semana pasada": 0.3880424651964426}, {"modelo": "Regresión Ridge", "MAE": 334.091172242474, "RMSE": 486.7561441011853, "WAPE": 0.2613220771806731, "mejora vs. semana pasada": 0.0014668900859445833}, {"modelo": "Igual que la semana pasada", "MAE": 334.58196721311475, "RMSE": 580.9139674412262, "WAPE": 0.2617059710750756, "mejora vs. semana pasada": 0.0}, {"modelo": "Promedio histórico", "MAE": 358.48091402973694, "RMSE": 576.8508145156769, "WAPE": 0.280399438437983, "mejora vs. semana pasada": -0.07142927341747485}], "semana": {"labels": ["2025-10-06T00", "2025-10-06T01", "2025-10-06T02", "2025-10-06T03", "2025-10-06T04", "2025-10-06T05", "2025-10-06T06", "2025-10-06T07", "2025-10-06T08", "2025-10-06T09", "2025-10-06T10", "2025-10-06T11", "2025-10-06T12", "2025-10-06T13", "2025-10-06T14", "2025-10-06T15", "2025-10-06T16", "2025-10-06T17", "2025-10-06T18", "2025-10-06T19", "2025-10-06T20", "2025-10-06T21", "2025-10-06T22", "2025-10-06T23", "2025-10-07T00", "2025-10-07T01", "2025-10-07T02", "2025-10-07T03", "2025-10-07T04", "2025-10-07T05", "2025-10-07T06", "2025-10-07T07", "2025-10-07T08", "2025-10-07T09", "2025-10-07T10", "2025-10-07T11", "2025-10-07T12", "2025-10-07T13", "2025-10-07T14", "2025-10-07T15", "2025-10-07T16", "2025-10-07T17", "2025-10-07T18", "2025-10-07T19", "2025-10-07T20", "2025-10-07T21", "2025-10-07T22", "2025-10-07T23", "2025-10-08T00", "2025-10-08T01", "2025-10-08T02", "2025-10-08T03", "2025-10-08T04", "2025-10-08T05", "2025-10-08T06", "2025-10-08T07", "2025-10-08T08", "2025-10-08T09", "2025-10-08T10", "2025-10-08T11", "2025-10-08T12", "2025-10-08T13", "2025-10-08T14", "2025-10-08T15", "2025-10-08T16", "2025-10-08T17", "2025-10-08T18", "2025-10-08T19", "2025-10-08T20", "2025-10-08T21", "2025-10-08T22", "2025-10-08T23", "2025-10-09T00", "2025-10-09T01", "2025-10-09T02", "2025-10-09T03", "2025-10-09T04", "2025-10-09T05", "2025-10-09T06", "2025-10-09T07", "2025-10-09T08", "2025-10-09T09", "2025-10-09T10", "2025-10-09T11", "2025-10-09T12", "2025-10-09T13", "2025-10-09T14", "2025-10-09T15", "2025-10-09T16", "2025-10-09T17", "2025-10-09T18", "2025-10-09T19", "2025-10-09T20", "2025-10-09T21", "2025-10-09T22", "2025-10-09T23", "2025-10-10T00", "2025-10-10T01", "2025-10-10T02", "2025-10-10T03", "2025-10-10T04", "2025-10-10T05", "2025-10-10T06", "2025-10-10T07", "2025-10-10T08", "2025-10-10T09", "2025-10-10T10", "2025-10-10T11", "2025-10-10T12", "2025-10-10T13", "2025-10-10T14", "2025-10-10T15", "2025-10-10T16", "2025-10-10T17", "2025-10-10T18", "2025-10-10T19", "2025-10-10T20", "2025-10-10T21", "2025-10-10T22", "2025-10-10T23", "2025-10-11T00", "2025-10-11T01", "2025-10-11T02", "2025-10-11T03", "2025-10-11T04", "2025-10-11T05", "2025-10-11T06", "2025-10-11T07", "2025-10-11T08", "2025-10-11T09", "2025-10-11T10", "2025-10-11T11", "2025-10-11T12", "2025-10-11T13", "2025-10-11T14", "2025-10-11T15", "2025-10-11T16", "2025-10-11T17", "2025-10-11T18", "2025-10-11T19", "2025-10-11T20", "2025-10-11T21", "2025-10-11T22", "2025-10-11T23", "2025-10-12T00", "2025-10-12T01", "2025-10-12T02", "2025-10-12T03", "2025-10-12T04", "2025-10-12T05", "2025-10-12T06", "2025-10-12T07", "2025-10-12T08", "2025-10-12T09", "2025-10-12T10", "2025-10-12T11", "2025-10-12T12", "2025-10-12T13", "2025-10-12T14", "2025-10-12T15", "2025-10-12T16", "2025-10-12T17", "2025-10-12T18", "2025-10-12T19", "2025-10-12T20", "2025-10-12T21", "2025-10-12T22", "2025-10-12T23"], "real": [99, 111, 98, 105, 132, 130, 394, 1732, 3185, 2493, 1695, 2299, 1817, 2307, 2171, 1504, 1770, 2748, 3774, 3311, 1968, 1642, 188, 113, 80, 77, 130, 114, 102, 135, 296, 1755, 2487, 1976, 1878, 1625, 2705, 2512, 2062, 1385, 1817, 3922, 3499, 4180, 2250, 1097, 191, 122, 110, 113, 140, 147, 109, 129, 415, 1395, 2754, 2135, 2046, 1707, 1979, 2000, 2037, 1611, 2262, 2848, 3125, 4640, 2333, 1196, 193, 112, 124, 148, 108, 132, 142, 124, 369, 2039, 4661, 2576, 1865, 2451, 2270, 2524, 1880, 1960, 2096, 2622, 4285, 3289, 2398, 1789, 143, 149, 113, 136, 146, 98, 99, 185, 347, 2024, 3152, 2046, 1632, 711, 665, 1660, 1744, 1145, 1084, 2913, 4661, 5107, 2446, 1066, 184, 146, 82, 64, 103, 62, 74, 88, 82, 117, 122, 348, 868, 856, 1246, 1599, 2387, 2892, 1906, 2289, 1444, 834, 583, 505, 60, 81, 53, 13, 25, 26, 35, 70, 55, 44, 29, 150, 438, 883, 1398, 472, 492, 553, 464, 546, 550, 310, 287, 68, 75, 23], "pred": [119.0, 107.0, 107.0, 114.0, 111.0, 124.0, 357.0, 1753.0, 3205.0, 2523.0, 1704.0, 1582.0, 1911.0, 2123.0, 1833.0, 1663.0, 1663.0, 2628.0, 3558.0, 3115.0, 1884.0, 1260.0, 184.0, 130.0, 117.0, 114.0, 105.0, 118.0, 115.0, 128.0, 375.0, 1764.0, 3200.0, 2603.0, 1757.0, 1622.0, 1860.0, 2027.0, 1957.0, 1604.0, 1731.0, 2720.0, 3482.0, 3281.0, 1925.0, 1315.0, 163.0, 132.0, 123.0, 113.0, 112.0, 116.0, 116.0, 129.0, 360.0, 1797.0, 3294.0, 2667.0, 1768.0, 1604.0, 1837.0, 2139.0, 1913.0, 1665.0, 1703.0, 2699.0, 3513.0, 3137.0, 1854.0, 1305.0, 171.0, 125.0, 121.0, 113.0, 116.0, 117.0, 111.0, 129.0, 358.0, 1961.0, 3012.0, 2700.0, 1783.0, 1653.0, 1854.0, 2095.0, 1914.0, 1653.0, 1687.0, 2607.0, 3472.0, 3266.0, 1812.0, 1191.0, 199.0, 125.0, 121.0, 113.0, 113.0, 120.0, 118.0, 130.0, 373.0, 1855.0, 3383.0, 2603.0, 1732.0, 716.0, 969.0, 1320.0, 1277.0, 956.0, 994.0, 2672.0, 3559.0, 3762.0, 1921.0, 1339.0, 170.0, 132.0, 78.0, 75.0, 75.0, 76.0, 76.0, 74.0, 89.0, 119.0, 135.0, 424.0, 624.0, 969.0, 1637.0, 1789.0, 1980.0, 2045.0, 2166.0, 1827.0, 1265.0, 947.0, 641.0, 433.0, 87.0, 67.0, 45.0, 30.0, 43.0, 41.0, 46.0, 51.0, 70.0, 93.0, 97.0, 276.0, 390.0, 806.0, 1373.0, 507.0, 391.0, 379.0, 431.0, 632.0, 725.0, 480.0, 297.0, 180.0, 80.0, 33.0], "base": [73.0, 98.0, 130.0, 84.0, 111.0, 112.0, 337.0, 1672.0, 2554.0, 2603.0, 1408.0, 1660.0, 2411.0, 2281.0, 1768.0, 2015.0, 1637.0, 2810.0, 4586.0, 3549.0, 2703.0, 1082.0, 200.0, 135.0, 104.0, 93.0, 111.0, 126.0, 104.0, 117.0, 372.0, 2122.0, 2902.0, 3054.0, 1936.0, 1838.0, 1816.0, 1926.0, 2070.0, 1354.0, 1984.0, 2868.0, 3258.0, 4273.0, 1829.0, 1419.0, 151.0, 156.0, 130.0, 123.0, 89.0, 127.0, 147.0, 165.0, 422.0, 1828.0, 2375.0, 3294.0, 1791.0, 1499.0, 1710.0, 2397.0, 2094.0, 1799.0, 1226.0, 2587.0, 5024.0, 2133.0, 2270.0, 1345.0, 118.0, 82.0, 136.0, 124.0, 100.0, 130.0, 89.0, 127.0, 347.0, 1520.0, 3251.0, 2232.0, 2687.0, 1726.0, 2135.0, 2258.0, 2410.0, 1506.0, 2291.0, 3122.0, 4310.0, 3911.0, 2270.0, 1238.0, 205.0, 121.0, 120.0, 81.0, 68.0, 125.0, 94.0, 146.0, 243.0, 1818.0, 3023.0, 2508.0, 1787.0, 1636.0, 1976.0, 2118.0, 1999.0, 1800.0, 2103.0, 3113.0, 4729.0, 4646.0, 2297.0, 1428.0, 146.0, 177.0, 81.0, 84.0, 78.0, 65.0, 69.0, 55.0, 50.0, 105.0, 125.0, 422.0, 612.0, 1220.0, 1866.0, 1879.0, 2778.0, 2077.0, 2913.0, 2063.0, 1763.0, 1116.0, 748.0, 328.0, 115.0, 98.0, 94.0, 83.0, 88.0, 57.0, 74.0, 63.0, 63.0, 88.0, 117.0, 446.0, 423.0, 873.0, 1521.0, 2462.0, 2400.0, 2258.0, 2269.0, 1321.0, 1535.0, 806.0, 573.0, 503.0, 219.0, 103.0], "lluvia": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4.9, 3.5, 1.2, 1.3, 3.8, 3.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.9, 1.4, 4.5, 10.6, 4.0, 5.9, 3.1, 2.2, 2.2, 5.3, 7.7, 6.8, 1.1, 0.0, 0.0, 11.8, 17.3, 23.7, 12.1, 8.4, 6.1, 6.5, 6.1, 17.6, 3.3, 23.9]}, "por_hora": {"modelo": [19.3, 18.2, 17.0, 17.4, 15.6, 21.0, 47.6, 238.9, 369.1, 342.1, 205.9, 218.3, 245.4, 315.9, 344.1, 290.2, 301.3, 370.1, 573.0, 434.1, 299.5, 158.7, 28.6, 22.8], "base": [32.1, 32.4, 30.2, 31.3, 28.4, 32.1, 80.6, 457.7, 672.0, 614.4, 407.5, 357.1, 442.7, 449.9, 568.7, 477.2, 458.5, 484.3, 810.9, 726.8, 473.3, 282.3, 42.6, 37.1]}, "por_lluvia": [{"tramo_lluvia": "sin lluvia", "horas": 2686.0, "WAPE modelo": 0.1578500077620234, "WAPE semana pasada": 0.23208257980001654}, {"tramo_lluvia": "llovizna (≤1 mm)", "horas": 20.0, "WAPE modelo": 0.18290142722704342, "WAPE semana pasada": 0.3447504827726395}, {"tramo_lluvia": "moderada (1–5 mm)", "horas": 135.0, "WAPE modelo": 0.2220238441591706, "WAPE semana pasada": 0.7082072382552578}, {"tramo_lluvia": "fuerte (>5 mm)", "horas": 87.0, "WAPE modelo": 0.19279440620513344, "WAPE semana pasada": 1.6939313328195311}], "importancia": [{"variable": "Hora", "valor": 420.7790805488492}, {"variable": "Promedio 7 días, misma hora", "valor": 202.5995751635105}, {"variable": "Misma hora, semana anterior", "valor": 139.48797671603808}, {"variable": "Día no laborable", "valor": 139.3755155067416}, {"variable": "Lluvia (mm)", "valor": 68.86292273034434}, {"variable": "Temperatura", "valor": 38.800611844989895}, {"variable": "Día de la semana", "valor": 15.168902217317516}, {"variable": "Feriado", "valor": 14.031284203689083}, {"variable": "Viento", "valor": 1.3187242526366205}, {"variable": "Mes", "valor": 0.9776632269506607}], "escenario": {"seco": [123.0, 115.0, 120.0, 118.0, 114.0, 134.0, 372.0, 1962.0, 3011.0, 2580.0, 1710.0, 1584.0, 1943.0, 2111.0, 1993.0, 1661.0, 1832.0, 2682.0, 3523.0, 3344.0, 1843.0, 1192.0, 184.0, 132.0], "lluvia": [123.0, 115.0, 120.0, 118.0, 114.0, 134.0, 380.0, 1962.0, 3002.0, 2685.0, 1702.0, 1602.0, 1977.0, 2111.0, 1021.0, 835.0, 1009.0, 1258.0, 1436.0, 1491.0, 969.0, 577.0, 185.0, 132.0], "perdida": 0.2711622164818399, "perdida_tarde": 0.5242573186592648, "intensidades": {"llovizna": {"mm": 0.8, "pred": [123.0, 115.0, 120.0, 118.0, 114.0, 134.0, 380.0, 1962.0, 3002.0, 2685.0, 1702.0, 1602.0, 1977.0, 2111.0, 1471.0, 1267.0, 1346.0, 1873.0, 2284.0, 2362.0, 1362.0, 926.0, 185.0, 132.0], "perdida": 0.14627602857874722}, "moderada": {"mm": 4.0, "pred": [123.0, 115.0, 120.0, 118.0, 114.0, 134.0, 380.0, 1962.0, 3002.0, 2685.0, 1702.0, 1602.0, 1977.0, 2111.0, 1021.0, 835.0, 1009.0, 1258.0, 1436.0, 1491.0, 969.0, 577.0, 185.0, 132.0], "perdida": 0.2711622164818399}, "fuerte": {"mm": 10.0, "pred": [123.0, 115.0, 120.0, 118.0, 114.0, 134.0, 380.0, 1962.0, 3002.0, 2685.0, 1702.0, 1602.0, 1977.0, 2111.0, 629.0, 483.0, 607.0, 814.0, 886.0, 918.0, 594.0, 316.0, 185.0, 132.0], "perdida": 0.36857704966921445}}}, "calendario": {"Día hábil": 29873.182926829268, "Feriado en día hábil": 15936.258064516129, "Fin de semana": 15982.5625, "Día hábil de enero (vacaciones)": 25020.727272727272}};</script>
+<script src="../assets/charts.js"></script>
+<script src="../assets/dash.js"></script>
+<script>
+(function(){
+  const D = window.DATA, $ = s => document.querySelector(s);
+  const DES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], DEN = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MOD = {'Gradient boosting':['Gradient boosting','Gradient boosting'],'Regresión Ridge':['Regresión Ridge','Ridge regression'],'Igual que la semana pasada':['Igual que la semana pasada','Same as last week'],'Promedio histórico':['Promedio histórico','Historical average']};
+  const LLU = {'sin lluvia':'no rain','llovizna (≤1 mm)':'drizzle (≤1 mm)','moderada (1–5 mm)':'moderate (1–5 mm)','fuerte (>5 mm)':'heavy (>5 mm)'};
+  const VAR = {'Hora':'Hour','Promedio 7 días, misma hora':'7-day average, same hour','Misma hora, semana anterior':'Same hour, last week','Día no laborable':'Non-working day','Lluvia (mm)':'Rain (mm)','Temperatura':'Temperature','Día de la semana':'Day of week','Feriado':'Public holiday','Viento':'Wind','Mes':'Month','Humedad':'Humidity','Tendencia':'Trend','Llueve (sí/no)':'Raining (yes/no)','Vacaciones':'Holidays'};
+  const kpi = (l,v,n) => `<div class="kpi"><span>${l}</span><strong>${v}</strong>${n?`<small>${n}</small>`:''}</div>`;
+  let esc = 'moderada';
+  const semLab = iso => { const d = new Date(iso.slice(0,10)+'T12:00:00'), dw = (d.getDay()+6)%7; return `${L(DES,DEN)[dw]} ${iso.slice(8,10)}/${iso.slice(5,7)} ${iso.slice(11,13)}h`; };
+
+  function escRender(){
+    const E = D.escenario, I = E.intensidades[esc], hrs = Array.from({length:24},(_,h)=>h+'h');
+    DC.line($('#ch-esc'), {labels:hrs, yMin:0, series:[{name:L('Día seco','Dry day'), data:E.seco, color:'#c5f23a'},{name:L('Con lluvia','With rain'), data:I.pred, color:'#5fd4c4'}], tipFmt:v=>fmt.int(v)+L(' viajes',' trips')});
+    const s1 = E.seco.reduce((a,b)=>a+b,0), s2 = I.pred.reduce((a,b)=>a+b,0);
+    $('#esc-k').innerHTML = kpi(L('Día seco','Dry day'), fmt.int(s1), L('viajes','trips')) + kpi(L('Con lluvia','With rain'), fmt.int(s2), fmt.dec(I.mm,1)+' mm/h') + kpi(L('Caída del día','Daily drop'), '−'+fmt.pct(I.perdida,0), L('menos bicis a redistribuir','fewer bikes to rebalance'));
+  }
+
+  function render(){
+    const K = D.kpis, M = D.modelos, gb = M.find(m=>m.modelo==='Gradient boosting'), base = M.find(m=>m.modelo==='Igual que la semana pasada');
+    $('#kpis').innerHTML =
+      kpi(L('Viajes por día','Trips per day'), fmt.int(K.viajes_dia), '<b>+'+fmt.pct(K.crec,0)+'</b>'+L(' en 2025',' in 2025')) +
+      kpi(L('Error del modelo (WAPE)','Model error (WAPE)'), fmt.pct(gb.WAPE,0), L('baseline: ','baseline: ')+fmt.pct(base.WAPE,0)) +
+      kpi(L('Menos error','Error reduction'), '−'+fmt.pct(gb['mejora vs. semana pasada'],0), L('vs. "igual que la semana pasada"','vs. "same as last week"')) +
+      kpi(L('Con lluvia fuerte','In heavy rain'), '−'+fmt.pct(1-K.lluvia_fuerte,0), L('de demanda vs. horas secas','demand vs. dry hours')) +
+      kpi(L('Hora pico promedio','Average peak hour'), fmt.int(K.pico), L('viajes por hora · días hábiles 18 h','trips per hour · weekdays 6 pm'));
+
+    DC.heat($('#ch-mapa'), {rows:L(DES,DEN), cols:Array.from({length:24},(_,h)=>h+'h'), values:D.mapa.valores, fmt:v=>fmt.int(v), valueName:L('viajes/hora','trips/hour'), cellH:26, labelW:44});
+
+    const S = D.semana;
+    const join = (a, y) => a.length < 2 ? a.join('') : a.slice(0,-1).join(', ') + y + a[a.length-1];
+    const dl = [...new Set(S.labels.filter((l,i)=>S.lluvia[i]>1).map(l=>l.slice(8,10)+'/'+l.slice(5,7)))];
+    $('#cap-sem').textContent = L(`Del ${S.labels[0].slice(8,10)}/${S.labels[0].slice(5,7)} al ${S.labels[167].slice(8,10)}/${S.labels[167].slice(5,7)}/2025. Llovió el ${join(dl,' y el ')}: el modelo anticipa la caída que el baseline no ve.`,
+                                  `${S.labels[0].slice(5,7)}/${S.labels[0].slice(8,10)} to ${S.labels[167].slice(5,7)}/${S.labels[167].slice(8,10)}/2025. It rained on ${join(dl.map(x=>x.split('/').reverse().join('/')),' and ')}: the model anticipates the drop the baseline misses.`);
+    DC.line($('#ch-sem'), {labels:S.labels.map(semLab), labelGap:130, yMin:0, series:[
+      {name:L('Real','Actual'), data:S.real, color:'#9ba393', width:2.4},
+      {name:L('Pronóstico','Forecast'), data:S.pred, color:'#c5f23a', width:1.8},
+      {name:L('Igual que la semana pasada','Same as last week'), data:S.base, color:'#f2c14e', dash:true, width:1.2}], tipFmt:v=>fmt.int(v)});
+
+    const Ms = [...M].sort((a,b)=>a.WAPE-b.WAPE);
+    DC.bars($('#ch-mod'), {horizontal:true, labels:Ms.map(m=>L(...MOD[m.modelo])), labelW:180, series:[{name:'', data:Ms.map(m=>m.WAPE), colors:Ms.map(m=>m.modelo==='Gradient boosting'?'#c5f23a':m.modelo==='Regresión Ridge'?'#5fd4c4':'#6c7465')}], xFmt:v=>fmt.pct(v,1)});
+    DC.line($('#ch-err'), {labels:Array.from({length:24},(_,h)=>h+'h'), yMin:0, series:[{name:'Gradient boosting', data:D.por_hora.modelo, color:'#c5f23a'},{name:L('Igual que la semana pasada','Same as last week'), data:D.por_hora.base, color:'#f2c14e', dash:true}], tipFmt:v=>fmt.int(v)+L(' viajes',' trips')});
+    escRender();
+    DC.bars($('#ch-imp'), {horizontal:true, labels:D.importancia.map(r=>L(r.variable,VAR[r.variable]||r.variable)), labelW:180, series:[{name:'', data:D.importancia.map(r=>Math.max(0,r.valor)), color:'#c5f23a'}], xFmt:v=>fmt.int(v)});
+    DC.bars($('#ch-lluvia'), {labels:D.lluvia.labels.map(l=>L(l,LLU[l])), labelGap:80, yMax:1.2, series:[{name:L('Demanda relativa','Relative demand'), data:D.lluvia.valores, colors:['#c5f23a','#5fd4c4','#f2c14e','#e86f5a']}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,0)});
+    DC.line($('#ch-temp'), {labels:D.temp.labels, yMin:.4, yMax:1.2, series:[{name:L('Demanda relativa','Relative demand'), data:D.temp.valores, color:'#c5f23a'}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,0)});
+    DC.line($('#ch-dia'), {labels:D.diario.fechas.map(f=>f.slice(5,7)+'/'+f.slice(2,4)), yMin:0, series:[{name:L('Viajes del día (muestra semanal)','Daily trips (weekly sample)'), data:D.diario.viajes, color:'#3a4234', width:1.2},{name:L('Media móvil 28 días','28-day moving average'), data:D.diario.media, color:'#c5f23a', width:2.4}], yFmt:v=>(v/1000).toFixed(0)+'k', tipFmt:v=>fmt.int(v)});
+
+    const C = D.calendario;
+    const F = L([
+      ['Dos usos muy distintos',`Días hábiles: ~${fmt.int(C['Día hábil'])} viajes con picos a las 8 y 18 h. Fines de semana y feriados: la mitad, de tarde.`],
+      ['El clima manda','Con lluvia fuerte la demanda cae al 34% de lo normal; bajo 8 °C, un 38%.'],
+      ['El modelo le gana a la regla simple','WAPE de 16% contra 26% de "igual que la semana pasada": un 39% menos de error en 4 meses no vistos.'],
+      ['Un modelo lineal no alcanza','La regresión Ridge no mejora al baseline: los efectos de clima y horario se multiplican.'],
+      ['La ventaja aparece cuando llueve','Con lluvia fuerte: 19% de error del modelo contra 169% del baseline, que espera una semana seca.'],
+    ],[
+      ['Two very different uses',`Weekdays: ~${fmt.int(C['Día hábil'])} trips peaking at 8 am and 6 pm. Weekends and holidays: half that, in the afternoon.`],
+      ['Weather rules','In heavy rain demand drops to 34% of normal; below 8 °C, by 38%.'],
+      ['The model beats the simple rule','WAPE of 16% vs 26% for "same as last week": 39% less error over 4 unseen months.'],
+      ['A linear model isn\'t enough','Ridge regression doesn\'t beat the baseline: weather and time-of-day effects multiply.'],
+      ['The edge shows when it rains','In heavy rain: 19% model error vs 169% for the baseline, which expects a dry week.'],
+    ]);
+    $('#finds').innerHTML = F.map((f,i)=>`<div class="find"><i>0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const R = L([
+      ['Redistribución con el pronóstico de mañana','Menos camiones y personal los días de lluvia o frío; refuerzo en los picos de días hábiles.'],
+      ['Alertas por clima en hora pico','Avisar con un día de anticipación cuando se espere lluvia a las 8 o a las 18 h.'],
+      ['Mantenimiento en horas valle','Programar arreglos en madrugada, invierno y vacaciones de enero.'],
+      ['Próximo paso: pronóstico por estación','Decidir dónde llevar las bicis, con intervalos de predicción para planificar con margen.'],
+    ],[
+      ['Rebalance with tomorrow\'s forecast','Fewer trucks and staff on rainy or cold days; extra capacity at weekday peaks.'],
+      ['Weather alerts at peak hours','Warn a day ahead when rain is expected at 8 am or 6 pm.'],
+      ['Maintenance in off-peak hours','Schedule repairs overnight, in winter and during January holidays.'],
+      ['Next step: per-station forecast','Decide where to move bikes, with prediction intervals to plan with a safety margin.'],
+    ]);
+    $('#recs').innerHTML = R.map((f,i)=>`<div class="find rec"><i>→ 0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const MT = L([
+      ['Datos','<b>Simulados</b>, inspirados en EcoBici: viajes por hora y clima, ene 2024 – dic 2025, con feriados argentinos reales.'],
+      ['Partición temporal','Entrenamiento hasta ago 2025; prueba sep–dic 2025. Las variables solo usan información disponible el día anterior.'],
+      ['Variables','Hora, día, mes, feriado, vacaciones, temperatura, lluvia, humedad, viento, misma hora de la semana anterior y promedio de 7 días.'],
+      ['Modelos','Dos baselines, regresión Ridge con splines y <b>HistGradientBoosting</b> con pérdida de Poisson (conteos).'],
+      ['Métricas','MAE, RMSE y WAPE (error total como % de la demanda), más análisis del error por hora y por lluvia.'],
+    ],[
+      ['Data','<b>Simulated</b>, inspired by EcoBici: hourly trips and weather, Jan 2024 – Dec 2025, with real Argentine holidays.'],
+      ['Time-based split','Train through Aug 2025; test Sep–Dec 2025. Features only use information available the day before.'],
+      ['Features','Hour, day, month, holiday, vacation, temperature, rain, humidity, wind, same hour last week and 7-day average.'],
+      ['Models','Two baselines, Ridge regression with splines and <b>HistGradientBoosting</b> with Poisson loss (counts).'],
+      ['Metrics','MAE, RMSE and WAPE (total error as % of demand), plus error analysis by hour and by rainfall.'],
+    ]);
+    $('#method').innerHTML = MT.map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+  }
+  document.querySelectorAll('#seg-esc button').forEach(b=>b.addEventListener('click',()=>{ esc=b.dataset.v; document.querySelectorAll('#seg-esc button').forEach(x=>x.setAttribute('aria-pressed',x===b)); escRender(); }));
+  document.addEventListener('langchange', render);
+})();
+</script>
+</body>
+</html>

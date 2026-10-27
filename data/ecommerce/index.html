@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-commerce: clientes y cohortes — Mateo Taylor</title>
+<meta name="title-en" content="E-commerce: customers & cohorts — Mateo Taylor">
+<meta name="description" content="Análisis de clientes, cohortes de retención, LTV/CAC por canal y segmentación RFM de una tienda online. Proyecto de Mateo Taylor.">
+<meta name="theme-color" content="#0c0e0b">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dash.css">
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="crumb"><a href="https://www.taylorsportafolio.com/"><b>&lt;/&gt;</b> Mateo Taylor</a><small>/ <a href="../">DATA</a> / E-COMMERCE</small></div>
+  <div class="lang" role="group" aria-label="Idioma"><button data-lang="es" aria-pressed="true">ES</button>/<button data-lang="en" aria-pressed="false">EN</button></div>
+</div></div>
+
+<main class="wrap">
+<header class="hd">
+  <p class="kick"><b>01 · Data Analyst</b><span>E-commerce · <x-t data-en="Retention">Retención</x-t> · LTV/CAC · RFM</span></p>
+  <h1><x-t data-en="Is the store growing in a healthy way?">¿La tienda crece de forma sana?</x-t></h1>
+  <p class="sub"><x-t data-en="Two years of an online clothing store: which channels bring customers who come back, how much each customer is worth versus what it costs to acquire them, and who each marketing action should target.">Análisis de 2 años de una tienda de indumentaria online: qué canales traen clientes que vuelven, cuánto vale cada cliente frente a lo que cuesta conseguirlo y a quién conviene dirigir cada acción.</x-t></p>
+  <div class="hd-row">
+    <a class="btn pri" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/01-ecommerce-cohortes/analisis.ipynb" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg><x-t data-en="View notebook">Ver notebook</x-t></a>
+    <a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data/projects/01-ecommerce-cohortes" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg><x-t data-en="Code &amp; data">Código y datos</x-t></a>
+    <span class="note"><x-t data-en="Simulated data">Datos simulados</x-t></span>
+  </div>
+  <div class="stack"><span>Python</span><span>pandas</span><span>SQL · SQLite</span><span>matplotlib</span><span><x-t data-en="Cohort analysis">Análisis de cohortes</x-t></span><span>RFM</span></div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="grid">
+  <article class="card w12">
+    <h2 id="t-mes"><x-t data-en="Revenue and customers by month">Ingresos y clientes por mes</x-t></h2>
+    <p class="cap"><x-t data-en="Growth comes from new customers; returning customers grow much more slowly.">El crecimiento viene de clientes nuevos; los recurrentes crecen mucho más lento.</x-t></p>
+    <div class="ctl"><div class="seg" id="seg-mes"><button data-v="ing" aria-pressed="true"><x-t data-en="Revenue">Ingresos</x-t></button><button data-v="cli" aria-pressed="false"><x-t data-en="Customers">Clientes</x-t></button><button data-v="tic" aria-pressed="false">Ticket</button></div></div>
+    <div id="ch-mes" data-h="300"></div>
+  </article>
+
+  <article class="card w8">
+    <h2><x-t data-en="Retention by cohort">Retención por cohorte</x-t></h2>
+    <p class="cap"><x-t data-en="% of each cohort (month of first purchase) that buys again in the following months.">% de cada cohorte (mes de primera compra) que vuelve a comprar en los meses siguientes.</x-t></p>
+    <div class="tw"><div id="ch-coh" style="min-width:560px"></div></div>
+  </article>
+  <article class="card w4">
+    <h2><x-t data-en="Average retention curve">Curva de retención promedio</x-t></h2>
+    <p class="cap"><x-t data-en="2024 vs 2025 cohorts: customer quality isn&#x27;t improving.">Cohortes 2024 vs 2025: la calidad de los clientes no mejora.</x-t></p>
+    <div id="ch-curva" data-h="230"></div>
+    <div class="kpis" style="margin:14px 0 0;grid-template-columns:repeat(2,minmax(0,1fr))" id="ret-kpi"></div>
+  </article>
+
+  <article class="card">
+    <h2><x-t data-en="180-day repurchase by channel">Recompra a 180 días por canal</x-t></h2>
+    <p class="cap"><x-t data-en="% of customers who made a second purchase within 6 months (2024 cohorts).">% de clientes que hizo una segunda compra dentro de los 6 meses (cohortes 2024).</x-t></p>
+    <div id="ch-rec"></div>
+  </article>
+  <article class="card">
+    <h2>LTV 12 <x-t data-en="months">meses</x-t> / CAC</h2>
+    <p class="cap"><x-t data-en="How many times each channel pays back what it costs to acquire a customer. Healthy minimum: 3x.">Cuántas veces recupera cada canal lo que cuesta conseguir un cliente. Mínimo sano: 3x.</x-t></p>
+    <div id="ch-ltv"></div>
+    <div class="tw"><table class="dt" id="tb-canal"></table></div>
+  </article>
+
+  <article class="card w7">
+    <h2><x-t data-en="RFM segments">Segmentos RFM</x-t></h2>
+    <p class="cap"><x-t data-en="Recency, frequency and monetary value as of 12/31/2025: few customers drive a large share of revenue.">Recencia, frecuencia y monto al 31/12/2025: pocos clientes concentran gran parte de los ingresos.</x-t></p>
+    <div id="ch-rfm" data-h="290"></div>
+  </article>
+  <article class="card w5">
+    <h2><x-t data-en="The welcome-coupon effect">El efecto del cupón de bienvenida</x-t></h2>
+    <p class="cap"><x-t data-en="Customers who joined with a coupon vs. those who didn&#x27;t (2024 cohorts).">Clientes que entraron con cupón frente a los que no (cohortes 2024).</x-t></p>
+    <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0" id="cup"></div>
+    <div id="ch-cup" data-h="170"></div>
+  </article>
+
+  <article class="card w7">
+    <h2><x-t data-en="Seasonality, detrended">Estacionalidad, sin tendencia</x-t></h2>
+    <p class="cap"><x-t data-en="Index by month (1 = average). Cyber Monday, Hot Sale and the holidays shape the year.">Índice por mes (1 = promedio). Cyber Monday, Hot Sale y fiestas marcan el año.</x-t></p>
+    <div id="ch-est" data-h="240"></div>
+  </article>
+  <article class="card w5">
+    <h2><x-t data-en="Categories and returns">Categorías y devoluciones</x-t></h2>
+    <p class="cap"><x-t data-en="Share of sales and return rate.">Participación en ventas y tasa de devolución.</x-t></p>
+    <div class="tw"><table class="dt" id="tb-cat"></table></div>
+  </article>
+</section>
+
+<section class="sec">
+  <p class="sec-t"><b>01</b><x-t data-en="Findings">Hallazgos</x-t></p>
+  <div class="finds" id="finds"></div>
+</section>
+<section class="sec">
+  <p class="sec-t"><b>02</b><x-t data-en="Recommendations">Recomendaciones</x-t></p>
+  <div class="finds" id="recs"></div>
+</section>
+<section class="sec">
+  <p class="sec-t"><b>03</b><x-t data-en="Methodology">Metodología</x-t></p>
+  <dl class="method" id="method"></dl>
+</section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Mateo Taylor · <a href="https://www.taylorsportafolio.com/">taylorsportafolio.com</a></span><span><x-t data-en="Custom SVG charts, no external libraries.">Gráficos propios en SVG, sin librerías externas.</x-t></span></div></footer>
+
+<script>window.DATA = {"kpis": {"ingresos_2025": 543483.0, "crec_ingresos": 0.7066938406365995, "pedidos_2025": 6677, "crec_pedidos": 0.7151297200102749, "ticket_2025": 81.39628575707653, "crec_ticket": -0.004918508072745076, "clientes": 6524, "recurrentes_share": 0.3827814569536424, "ret_2024": 0.09672416458165457, "ret_2025": 0.09926652712298108}, "mensual": {"mes": ["2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "ingresos_usd": [11220.0, 12101.0, 14484.0, 18847.0, 26700.0, 24803.0, 31862.0, 28471.0, 28997.0, 30581.0, 47081.0, 43295.0, 33114.0, 31652.0, 36922.0, 36242.0, 47995.0, 41585.0, 50574.0, 36568.0, 43703.0, 48612.0, 68229.0, 68287.0], "pedidos": [156, 138, 176, 222, 339, 312, 359, 328, 348, 360, 594, 561, 404, 380, 424, 462, 619, 536, 595, 460, 528, 582, 861, 826], "ticket_promedio": [71.92, 87.69, 82.29, 84.89, 78.76, 79.5, 88.75, 86.8, 83.32, 84.95, 79.26, 77.17, 81.97, 83.29, 87.08, 78.45, 77.54, 77.58, 85.0, 79.5, 82.77, 83.53, 79.24, 82.67], "clientes_nuevos": [156, 121, 151, 186, 269, 217, 238, 211, 220, 206, 384, 316, 213, 219, 256, 281, 380, 298, 344, 257, 288, 333, 492, 488], "clientes_recurrentes": [0, 17, 25, 36, 70, 95, 121, 117, 128, 154, 210, 245, 191, 161, 168, 181, 239, 238, 251, 203, 240, 249, 369, 338]}, "estacional": [0.8114715359539652, 0.7759954501113888, 0.8635982603920043, 0.9192402051168486, 1.1858571385808343, 1.0020193979214196, 1.1795945685165963, 0.8930206183226177, 0.9279372451636374, 0.9465879227374895, 1.3105320349639134, 1.184145622219287], "cohortes": {"filas": ["2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "valores": [[0.109, 0.109, 0.109, 0.0833, 0.0385, 0.0513, 0.0513, 0.0256, 0.0385, 0.0321, 0.0192, 0.0], [0.0661, 0.0248, 0.1157, 0.0661, 0.0661, 0.0661, 0.0496, 0.0413, 0.0496, 0.0413, 0.0083, 0.0083], [0.106, 0.1126, 0.0728, 0.0728, 0.0464, 0.0132, 0.0464, 0.0265, 0.0464, 0.0199, 0.0066, 0.0265], [0.1398, 0.1237, 0.129, 0.0806, 0.0699, 0.0645, 0.0591, 0.0376, 0.0484, 0.043, 0.0269, 0.043], [0.1747, 0.1264, 0.0929, 0.0781, 0.0632, 0.0706, 0.0967, 0.026, 0.0223, 0.0112, 0.0186, 0.0335], [0.1659, 0.0968, 0.106, 0.0876, 0.0968, 0.0737, 0.0461, 0.0323, 0.0276, 0.0138, 0.0276, 0.0276], [0.1387, 0.1261, 0.105, 0.1345, 0.0672, 0.0756, 0.0462, 0.0504, 0.0336, 0.042, 0.0336, 0.0294], [0.1374, 0.128, 0.1327, 0.128, 0.0616, 0.0284, 0.0284, 0.0379, 0.0332, 0.0237, 0.0284, 0.0142], [0.1636, 0.2045, 0.1455, 0.0727, 0.05, 0.0591, 0.05, 0.0545, 0.0591, 0.0364, 0.0182, 0.0364], [0.1893, 0.1796, 0.1165, 0.1262, 0.0825, 0.0534, 0.0534, 0.0437, 0.0243, 0.0194, 0.0243, 0.034], [0.1797, 0.1146, 0.0833, 0.0677, 0.0521, 0.0599, 0.0234, 0.0417, 0.0286, 0.0156, 0.026, 0.0339], [0.1456, 0.0886, 0.0823, 0.0854, 0.0696, 0.0601, 0.0475, 0.0411, 0.019, 0.019, 0.0253, 0.0348], [0.108, 0.0657, 0.0845, 0.0704, 0.0516, 0.061, 0.0188, 0.0376, 0.0282, 0.0376, 0.0329, null], [0.1461, 0.1005, 0.1279, 0.0548, 0.0776, 0.0457, 0.0457, 0.0274, 0.0365, 0.0365, null, null], [0.1328, 0.1602, 0.1055, 0.0781, 0.0703, 0.0508, 0.0352, 0.0742, 0.0352, null, null, null], [0.1423, 0.1174, 0.1139, 0.0819, 0.0925, 0.0747, 0.089, 0.0498, null, null, null, null], [0.1658, 0.1316, 0.0921, 0.0789, 0.0605, 0.0711, 0.0474, null, null, null, null, null], [0.1644, 0.0872, 0.1208, 0.0671, 0.0738, 0.0638, null, null, null, null, null, null], [0.093, 0.1076, 0.1134, 0.1076, 0.0669, null, null, null, null, null, null, null], [0.1401, 0.1245, 0.144, 0.1284, null, null, null, null, null, null, null, null], [0.1562, 0.2222, 0.0938, null, null, null, null, null, null, null, null, null], [0.1802, 0.1021, null, null, null, null, null, null, null, null, null, null], [0.1992, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null]]}, "curva": [0.1454, 0.1206, 0.1089, 0.0875, 0.0662, 0.058, 0.0491, 0.0405, 0.0354, 0.028, 0.0228, 0.0268], "canales": [{"canal": "Email", "clientes": 226, "recompra_180d": 0.6061946902654868, "ltv_12m": 235.12849557522125, "inversion_2024": 2118.38, "cac": 9.373362831858408, "ltv_cac": 25.084753443669218}, {"canal": "Referidos", "clientes": 286, "recompra_180d": 0.5594405594405595, "ltv_12m": 200.7575874125874, "inversion_2024": 4375.900000000001, "cac": 15.300349650349652, "ltv_cac": 13.121111085719507}, {"canal": "Orgánico", "clientes": 812, "recompra_180d": 0.43349753694581283, "ltv_12m": 157.0235591133005, "inversion_2024": null, "cac": null, "ltv_cac": null}, {"canal": "Google Ads", "clientes": 662, "recompra_180d": 0.3504531722054381, "ltv_12m": 132.51445619335348, "inversion_2024": 17897.76, "cac": 27.035891238670693, "ltv_cac": 4.901427329453519}, {"canal": "Paid Social", "clientes": 689, "recompra_180d": 0.22496371552975328, "ltv_12m": 97.7034978229318, "inversion_2024": 22360.0, "cac": 32.45283018867924, "ltv_cac": 3.0106310375670846}], "cupon": [{"grupo": "Sin cupón", "clientes": 1840, "recompra_180d": 0.43369565217391304, "ltv_12m": 162.54182608695655}, {"grupo": "Con cupón", "clientes": 835, "recompra_180d": 0.28502994011976046, "ltv_12m": 112.60378443113773}], "rfm": [{"segmento": "Dormidos", "clientes": 2344, "ingresos": 231811.47, "recencia_media": 482.7214163822526, "pedidos_medios": 1.2363481228668942, "% clientes": 0.35928877988963825, "% ingresos": 0.26894586974577356}, {"segmento": "Prometedores", "clientes": 855, "ingresos": 140453.94, "recencia_media": 115.06549707602339, "pedidos_medios": 2.0, "% clientes": 0.13105456774984672, "% ingresos": 0.16295357193723284}, {"segmento": "Leales", "clientes": 441, "ingresos": 125006.45, "recencia_media": 134.24489795918367, "pedidos_medios": 3.326530612244898, "% clientes": 0.06759656652360516, "% ingresos": 0.14503151383786814}, {"segmento": "Nuevos", "clientes": 1542, "ingresos": 115308.89, "recencia_media": 62.746433203631646, "pedidos_medios": 1.0, "% clientes": 0.23635806253832006, "% ingresos": 0.13378047993254918}, {"segmento": "Campeones", "clientes": 245, "ingresos": 108506.19, "recencia_media": 57.21632653061224, "pedidos_medios": 5.0, "% clientes": 0.03755364806866953, "% ingresos": 0.1258880401489631}, {"segmento": "En riesgo", "clientes": 266, "ingresos": 78277.29, "recencia_media": 407.49624060150376, "pedidos_medios": 3.3721804511278197, "% clientes": 0.0407725321888412, "% ingresos": 0.09081670480063882}, {"segmento": "Necesitan atención", "clientes": 831, "ingresos": 62561.89, "recencia_media": 227.07701564380264, "pedidos_medios": 1.0, "% clientes": 0.1273758430410791, "% ingresos": 0.07258381959697427}], "categorias": [{"categoria": "Zapatillas", "unidades": 2828, "importe": 251680.85, "tasa_devolucion": 0.11029126213592233, "% ventas": 0.2780525463403418}, {"categoria": "Camperas", "unidades": 1767, "importe": 175353.25, "tasa_devolucion": 0.06453634085213032, "% ventas": 0.1937271654619513}, {"categoria": "Pantalones", "unidades": 3573, "importe": 159403.63, "tasa_devolucion": 0.07607021866338158, "% ventas": 0.1761063077202485}, {"categoria": "Buzos", "unidades": 3664, "importe": 146566.35, "tasa_devolucion": 0.04980498049804981, "% ventas": 0.16192390809753607}, {"categoria": "Remeras", "unidades": 6450, "importe": 125522.01, "tasa_devolucion": 0.04287429257417252, "% ventas": 0.1386744939166323}, {"categoria": "Accesorios", "unidades": 3243, "importe": 46629.62, "tasa_devolucion": 0.023004059539918808, "% ventas": 0.05151557846329004}], "limpieza": {"duplicados eliminados": 65, "pedidos cancelados (excluidos)": 330, "pedidos con total 0 (excluidos)": 24, "regiones normalizadas": 138, "regiones vacías → 'Sin dato'": 80}};</script>
+<script src="../assets/charts.js"></script>
+<script src="../assets/dash.js"></script>
+<script>
+(function(){
+  const D = window.DATA, $ = s => document.querySelector(s);
+  const MES_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'], MES_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mlab = ym => { const [y,m] = ym.split('-'); return L(MES_ES,MES_EN)[+m-1] + ' ' + y.slice(2); };
+  const CAN = {'Orgánico':['Orgánico','Organic'],'Paid Social':['Paid Social','Paid Social'],'Google Ads':['Google Ads','Google Ads'],'Email':['Email','Email'],'Referidos':['Referidos','Referrals']};
+  const can = c => L(...(CAN[c]||[c,c]));
+  const SEG = {'Campeones':'Champions','Leales':'Loyal','Prometedores':'Promising','Nuevos':'New','En riesgo':'At risk','Dormidos':'Hibernating','Necesitan atención':'Need attn.'};
+  const SEG_ES = s => s==='Necesitan atención' ? 'Nec. atención' : s;
+  const CAT = {'Zapatillas':'Sneakers','Camperas':'Jackets','Pantalones':'Pants','Buzos':'Sweatshirts','Remeras':'T-shirts','Accesorios':'Accessories'};
+  let modo = 'ing';
+
+  function kpi(label, value, note){ return `<div class="kpi"><span>${label}</span><strong>${value}</strong>${note?`<small>${note}</small>`:''}</div>`; }
+  const delta = v => `<b class="${v<0?'neg':''}">${v>=0?'+':''}${fmt.pct(v,1)}</b>`;
+
+  function render(){
+    const K = D.kpis, ps = D.canales.find(c=>c.canal==='Paid Social');
+    $('#kpis').innerHTML =
+      kpi(L('Ingresos 2025','2025 revenue'), fmt.usdk(K.ingresos_2025), delta(K.crec_ingresos)+L(' vs 2024',' vs 2024')) +
+      kpi(L('Pedidos 2025','2025 orders'), fmt.int(K.pedidos_2025), delta(K.crec_pedidos)+L(' vs 2024',' vs 2024')) +
+      kpi(L('Ticket promedio','Average order'), fmt.usd(K.ticket_2025), delta(K.crec_ticket)+L(' · plano',' · flat')) +
+      kpi(L('Clientes recurrentes','Returning customers'), fmt.pct(K.recurrentes_share,0), L('de los activos de cada mes','of each month\'s active customers')) +
+      kpi(L('LTV/CAC Paid Social','Paid Social LTV/CAC'), fmt.dec(ps.ltv_cac,1)+'x', L('el canal que más crece','the fastest-growing channel'));
+
+    // mensual
+    const M = D.mensual, labs = M.mes.map(mlab);
+    if (modo==='ing') DC.line($('#ch-mes'), {labels:labs, area:true, series:[{name:L('Ingresos','Revenue'), data:M.ingresos_usd}], yFmt:v=>'$'+(v/1000).toFixed(0)+'k', tipFmt:fmt.usd});
+    else if (modo==='cli') DC.bars($('#ch-mes'), {labels:labs, stacked:true, series:[{name:L('Nuevos','New'), data:M.clientes_nuevos, color:'#c5f23a'},{name:L('Recurrentes','Returning'), data:M.clientes_recurrentes, color:'#5fd4c4'}], tipFmt:fmt.int});
+    else DC.line($('#ch-mes'), {labels:labs, yMin:60, yMax:100, series:[{name:L('Ticket promedio','Average order'), data:M.ticket_promedio, color:'#f2c14e'}], yFmt:v=>'$'+v.toFixed(0), tipFmt:v=>fmt.usd(v)});
+
+    // cohortes
+    const C = D.cohortes, rows = C.filas.map((f,i)=>[f,C.valores[i]]).filter(r=>r[1][0]!=null);
+    DC.heat($('#ch-coh'), {rows: rows.map(r=>mlab(r[0])), cols: Array.from({length:12},(_,i)=>'M'+(i+1)), values: rows.map(r=>r[1]), min:0, max:.2, showValues:true, fmt:v=>Math.round(v*100)+'%', valueName:L('retención','retention'), cellH:18, labelW:58});
+    // curva 2024 vs 2025
+    const avg = yr => Array.from({length:12},(_,k)=>{ const v = rows.filter(r=>r[0].startsWith(yr)).map(r=>r[1][k]).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; });
+    DC.line($('#ch-curva'), {labels:Array.from({length:12},(_,i)=>'M'+(i+1)), yMin:0, yMax:.2, series:[{name:L('Cohortes 2024','2024 cohorts'), data:avg('2024')},{name:L('Cohortes 2025','2025 cohorts'), data:avg('2025'), color:'#5fd4c4', dash:true}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,1), margin:{l:40}});
+    $('#ret-kpi').innerHTML = kpi('M1–M6 · 2024', fmt.pct(K.ret_2024,1)) + kpi('M1–M6 · 2025', fmt.pct(K.ret_2025,1));
+
+    // canales
+    const cs = [...D.canales].sort((a,b)=>b.recompra_180d-a.recompra_180d);
+    DC.bars($('#ch-rec'), {horizontal:true, labels:cs.map(c=>can(c.canal)), labelW:96, series:[{name:'', data:cs.map(c=>c.recompra_180d), colors:cs.map(c=>c.recompra_180d>=.4?'#c5f23a':c.recompra_180d>=.3?'#f2c14e':'#e86f5a')}], xMax:.7, xFmt:v=>fmt.pct(v,0)});
+    const cl = D.canales.filter(c=>c.ltv_cac!=null).sort((a,b)=>b.ltv_cac-a.ltv_cac);
+    DC.bars($('#ch-ltv'), {horizontal:true, labels:cl.map(c=>can(c.canal)), labelW:96, series:[{name:'', data:cl.map(c=>c.ltv_cac), colors:cl.map(c=>c.ltv_cac>=5?'#c5f23a':c.ltv_cac>=3?'#f2c14e':'#e86f5a')}], xFmt:v=>fmt.dec(v,1)+'x'});
+    $('#tb-canal').innerHTML = `<thead><tr><th>${L('Canal','Channel')}</th><th class="num">${L('Clientes','Customers')}</th><th class="num">LTV 12m</th><th class="num">CAC</th></tr></thead><tbody>` +
+      D.canales.map(c=>`<tr><td>${can(c.canal)}</td><td class="num">${fmt.int(c.clientes)}</td><td class="num">${fmt.usd(c.ltv_12m)}</td><td class="num">${c.cac==null?'—':fmt.usd(c.cac)}</td></tr>`).join('') + '</tbody>';
+
+    // RFM
+    const R = D.rfm;
+    DC.bars($('#ch-rfm'), {labels:R.map(r=>L(SEG_ES(r.segmento),SEG[r.segmento])), yMax:.4, series:[{name:L('% de clientes','% of customers'), data:R.map(r=>r['% clientes']), color:'#6c7465'},{name:L('% de ingresos','% of revenue'), data:R.map(r=>r['% ingresos']), color:'#c5f23a'}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,1), margin:{b:34}});
+
+    // cupón
+    const sin = D.cupon.find(c=>c.grupo==='Sin cupón'), con = D.cupon.find(c=>c.grupo==='Con cupón');
+    $('#cup').innerHTML = kpi(L('Recompra 180 d','180-day repurchase'), fmt.pct(con.recompra_180d,0), L('con cupón vs ','with coupon vs ')+fmt.pct(sin.recompra_180d,0)) +
+                          kpi(L('LTV 12 meses','12-month LTV'), fmt.usd(con.ltv_12m), L('con cupón vs ','with coupon vs ')+fmt.usd(sin.ltv_12m));
+    DC.bars($('#ch-cup'), {horizontal:true, labels:[L('Sin cupón','No coupon'),L('Con cupón','Coupon')], labelW:90, rowH:34, series:[{name:'LTV', data:[sin.ltv_12m,con.ltv_12m], colors:['#c5f23a','#e86f5a']}], xFmt:fmt.usd});
+
+    // estacional
+    DC.bars($('#ch-est'), {labels:L(MES_ES,MES_EN), series:[{name:L('Índice','Index'), data:D.estacional, colors:D.estacional.map(v=>v>=1.1?'#c5f23a':v>=.95?'#5fd4c4':'#3a4234')}], yMax:1.6, yFmt:v=>v.toFixed(1), tipFmt:v=>fmt.dec(v,2)});
+
+    // categorías
+    $('#tb-cat').innerHTML = `<thead><tr><th>${L('Categoría','Category')}</th><th class="num">${L('% ventas','% sales')}</th><th class="num">${L('Devolución','Returns')}</th></tr></thead><tbody>` +
+      D.categorias.map(c=>`<tr><td>${L(c.categoria,CAT[c.categoria])}</td><td class="num">${fmt.pct(c['% ventas'],0)}</td><td class="num" style="color:${c.tasa_devolucion>=.09?'#e86f5a':'inherit'}">${fmt.pct(c.tasa_devolucion,1)}</td></tr>`).join('') + '</tbody>';
+
+    // hallazgos y recomendaciones
+    const F = L([
+      ['Crece por volumen, no por fidelidad','Ingresos +71% en 2025, impulsados por pedidos y clientes nuevos. El ticket se mantuvo plano y solo el 38% de los activos son recurrentes.'],
+      ['La retención no mejora','Las cohortes 2025 retienen igual que las de 2024 (≈10% entre M1 y M6): el crecimiento compra clientes nuevos en lugar de construir una base que vuelva.'],
+      ['El canal que más crece retiene peor','Paid Social pasó del 26% al 36% de las altas y del 48% al 59% de la inversión, pero solo el 22% recompra y su LTV/CAC es 3,0x.'],
+      ['El cupón atrae clientes de menor calidad','Con cupón: 29% de recompra y 31% menos de LTV que quienes entraron sin cupón.'],
+      ['El valor está concentrado','Campeones y Leales son el 11% de los clientes y el 27% de los ingresos. Hay 266 clientes en riesgo que ya gastaron US$ 78.000.'],
+    ],[
+      ['Growing on volume, not loyalty','Revenue +71% in 2025, driven by orders and new customers. Average order stayed flat and only 38% of active customers are returning.'],
+      ['Retention isn\'t improving','2025 cohorts retain the same as 2024 (≈10% across M1–M6): growth is buying new customers instead of building a base that comes back.'],
+      ['The fastest-growing channel retains worst','Paid Social went from 26% to 36% of acquisitions and from 48% to 59% of spend, yet only 22% buy again and its LTV/CAC is 3.0x.'],
+      ['Coupons bring lower-quality customers','With a coupon: 29% repurchase and 31% lower LTV than customers who joined without one.'],
+      ['Value is concentrated','Champions and Loyal are 11% of customers and 27% of revenue. 266 at-risk customers have already spent US$ 78,000.'],
+    ]);
+    $('#finds').innerHTML = F.map((f,i)=>`<div class="find"><i>0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const RC = L([
+      ['Mover presupuesto a Referidos y Email','Son los canales con mejor recompra y LTV/CAC (13x y 25x). Probar mover un 20% de Paid Social a un programa de referidos y medir las próximas cohortes.'],
+      ['Premiar la segunda compra, no la primera','Reemplazar el cupón de bienvenida por un beneficio en la segunda compra.'],
+      ['Reactivar a los clientes en riesgo','Campaña personalizada por categoría favorita: recuperar un cuarto de ese grupo equivale a unos US$ 20.000.'],
+      ['Bajar devoluciones en Zapatillas','28% de las ventas con 11% de devoluciones: guía de talles y reseñas de calce.'],
+    ],[
+      ['Shift budget to Referrals and Email','They have the best repurchase and LTV/CAC (13x and 25x). Test moving 20% of Paid Social spend into a referral program and track the next cohorts.'],
+      ['Reward the second purchase, not the first','Replace the welcome coupon with a second-purchase benefit.'],
+      ['Win back at-risk customers','A campaign personalized by favorite category: recovering a quarter of that group is worth about US$ 20,000.'],
+      ['Reduce sneaker returns','28% of sales with 11% returns: add a size guide and fit reviews.'],
+    ]);
+    $('#recs').innerHTML = RC.map((f,i)=>`<div class="find rec"><i>→ 0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const lp = D.limpieza;
+    const MT = L([
+      ['Datos', `<b>Simulados</b> con reglas de negocio plausibles: ${fmt.int(K.clientes)} clientes, ${fmt.int(D.mensual.pedidos.reduce((a,b)=>a+b,0))} pedidos válidos, ene 2024 – dic 2025.`],
+      ['Limpieza', `${lp['duplicados eliminados']} pedidos duplicados, ${lp['pedidos cancelados (excluidos)']} cancelados y ${lp['pedidos con total 0 (excluidos)']} de prueba excluidos; ${lp['regiones normalizadas']} regiones normalizadas.`],
+      ['Cohortes y LTV', 'Cohorte = mes de primera compra. LTV = ingresos del primer año por cliente; CAC = inversión del canal / clientes nuevos.'],
+      ['RFM', 'Recencia en quintiles, frecuencia por cantidad de pedidos, monto en quintiles. Segmentos por reglas sobre R y F.'],
+      ['Herramientas', 'Python, pandas, SQL sobre SQLite y matplotlib en el notebook; gráficos propios en SVG para este dashboard.'],
+    ],[
+      ['Data', `<b>Simulated</b> using plausible business rules: ${fmt.int(K.clientes)} customers, ${fmt.int(D.mensual.pedidos.reduce((a,b)=>a+b,0))} valid orders, Jan 2024 – Dec 2025.`],
+      ['Cleaning', `${lp['duplicados eliminados']} duplicate orders, ${lp['pedidos cancelados (excluidos)']} cancelled and ${lp['pedidos con total 0 (excluidos)']} test orders removed; ${lp['regiones normalizadas']} regions normalized.`],
+      ['Cohorts & LTV', 'Cohort = month of first purchase. LTV = first-year revenue per customer; CAC = channel spend / new customers.'],
+      ['RFM', 'Recency in quintiles, frequency by order count, monetary value in quintiles. Segments from rules on R and F.'],
+      ['Tools', 'Python, pandas, SQL on SQLite and matplotlib in the notebook; custom SVG charts for this dashboard.'],
+    ]);
+    $('#method').innerHTML = MT.map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+  }
+
+  document.querySelectorAll('#seg-mes button').forEach(b=>b.addEventListener('click',()=>{ modo=b.dataset.v; document.querySelectorAll('#seg-mes button').forEach(x=>x.setAttribute('aria-pressed',x===b)); render(); }));
+  document.addEventListener('langchange', render);
+})();
+</script>
+</body>
+</html>

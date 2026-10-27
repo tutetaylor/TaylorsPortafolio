@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing: embudo y A/B test — Mateo Taylor</title>
+<meta name="title-en" content="Marketing: funnel & A/B test — Mateo Taylor">
+<meta name="description" content="Análisis del embudo de conversión por canal y dispositivo, y A/B test del checkout con significancia estadística. Proyecto de Mateo Taylor.">
+<meta name="theme-color" content="#0c0e0b">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dash.css">
+<style>
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ab div{border:1px solid var(--line);border-radius:10px;padding:14px}
+.ab div.win{border-color:color-mix(in srgb,var(--acc) 55%,transparent);background:color-mix(in srgb,var(--acc) 6%,transparent)}
+.ab span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.ab strong{display:block;font-family:var(--display);font-size:2rem;font-weight:700;letter-spacing:-.03em;line-height:1.15}
+.ab small{color:var(--muted);font-size:12.5px}
+.forest{display:grid;gap:12px;margin-top:6px}
+.fr{display:grid;grid-template-columns:70px 1fr 66px;align-items:center;gap:10px;font-size:13px}
+.fr .lab{color:var(--muted)}
+.fr .val{font-family:var(--mono);font-size:12px;text-align:right}
+.fr .bar{position:relative;height:22px}
+.fr .zero{position:absolute;top:-4px;bottom:-4px;width:1px;background:var(--muted)}
+.fr .ci{position:absolute;top:9px;height:4px;border-radius:2px}
+.fr .pt{position:absolute;top:5px;width:12px;height:12px;border-radius:50%;margin-left:-6px}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:80px;margin-right:76px}
+.calc-out{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.calc-out{grid-template-columns:1fr}.ab strong{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="crumb"><a href="https://www.taylorsportafolio.com/"><b>&lt;/&gt;</b> Mateo Taylor</a><small>/ <a href="../">DATA</a> / MARKETING</small></div>
+  <div class="lang" role="group" aria-label="Idioma"><button data-lang="es" aria-pressed="true">ES</button>/<button data-lang="en" aria-pressed="false">EN</button></div>
+</div></div>
+
+<main class="wrap">
+<header class="hd">
+  <p class="kick"><b>02 · Data Analyst</b><span>Marketing · [[Embudo¦Funnel]] · A/B test</span></p>
+  <h1>[[¿El checkout de una página vende más?¦Does a one-page checkout sell more?]]</h1>
+  <p class="sub">[[8 semanas de sesiones de una tienda online: dónde se pierde la gente en el embudo, qué canales rinden y si el nuevo checkout mejora la conversión de verdad o es ruido.¦8 weeks of online-store sessions: where people drop off in the funnel, which channels pay off, and whether the new checkout really improves conversion or it's just noise.]]</p>
+  <div class="hd-row">
+    <a class="btn pri" href="https://github.com/tutetaylor/TaylorsPortafolio/blob/main/data/projects/02-marketing-ab-test/analisis.ipynb" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg>[[Ver notebook¦View notebook]]</a>
+    <a class="btn" href="https://github.com/tutetaylor/TaylorsPortafolio/tree/main/data/projects/02-marketing-ab-test" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>[[Código y datos¦Code & data]]</a>
+    <span class="note">[[Datos simulados¦Simulated data]]</span>
+  </div>
+  <div class="stack"><span>Python</span><span>pandas</span><span>SciPy</span><span>[[Test de proporciones¦Two-proportion z-test]]</span><span>Bootstrap</span><span>[[Potencia estadística¦Power analysis]]</span></div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="grid">
+  <article class="card w7">
+    <h2>[[Embudo de conversión¦Conversion funnel]]</h2>
+    <p class="cap">[[La mayor fuga está entre ver un producto y agregarlo al carrito.¦The biggest leak is between viewing a product and adding it to the cart.]]</p>
+    <div id="ch-emb"></div>
+  </article>
+  <article class="card w5">
+    <h2>[[Resultado del test¦Test result]]</h2>
+    <p class="cap">[[% de checkouts que terminan en compra, 15/09 – 26/10/2025.¦% of checkouts that end in a purchase, Sep 15 – Oct 26, 2025.]]</p>
+    <div class="ab" id="ab"></div>
+    <p class="cap" style="margin:0 0 8px">[[Diferencia B − A en puntos, con intervalo de confianza del 95%:¦B − A difference in points, with 95% confidence interval:]]</p>
+    <div class="forest" id="forest"></div>
+    <div class="scale" id="scale"></div>
+  </article>
+
+  <article class="card w12">
+    <h2>[[Conversión acumulada día a día¦Cumulative conversion, day by day]]</h2>
+    <p class="cap">[[Tras los primeros días, B queda arriba de forma estable: no es un efecto novedad.¦After the first few days B stays consistently ahead: it isn't a novelty effect.]]</p>
+    <div id="ch-acum" data-h="260"></div>
+  </article>
+
+  <article class="card">
+    <h2>[[Ingreso por sesión según canal¦Revenue per session by channel]]</h2>
+    <p class="cap">[[Paid social trae un tercio del tráfico, pero es el que menos rinde.¦Paid social brings a third of the traffic, but it's the least profitable.]]</p>
+    <div id="ch-can"></div>
+    <div class="tw"><table class="dt" id="tb-can"></table></div>
+  </article>
+  <article class="card">
+    <h2>[[Mobile, el punto débil del checkout¦Mobile, the checkout's weak spot]]</h2>
+    <p class="cap">[[% de quienes inician el checkout y compran, por dispositivo (A vs B).¦% of checkout starters who buy, by device (A vs B).]]</p>
+    <div id="ch-disp" data-h="240"></div>
+  </article>
+
+  <article class="card w12">
+    <h2>[[Calculadora de impacto¦Impact calculator]]</h2>
+    <p class="cap">[[Mové el volumen mensual de checkouts para ver cuánto suma la versión B, con el rango del intervalo de confianza.¦Move the monthly checkout volume to see how much version B adds, with the confidence-interval range.]]</p>
+    <div class="slider"><label for="vol">[[Checkouts por mes¦Checkouts per month]]</label><input type="range" id="vol" min="1000" max="20000" step="100"><output id="vol-o"></output></div>
+    <div class="calc-out kpis" style="margin:0" id="calc"></div>
+  </article>
+</section>
+
+<section class="sec">
+  <p class="sec-t"><b>01</b>[[Diseño del experimento¦Experiment design]]</p>
+  <dl class="method" id="design"></dl>
+</section>
+<section class="sec">
+  <p class="sec-t"><b>02</b>[[Hallazgos¦Findings]]</p>
+  <div class="finds" id="finds"></div>
+</section>
+<section class="sec">
+  <p class="sec-t"><b>03</b>[[Decisión y recomendaciones¦Decision & recommendations]]</p>
+  <div class="finds" id="recs"></div>
+</section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Mateo Taylor · <a href="https://www.taylorsportafolio.com/">taylorsportafolio.com</a></span><span>[[Gráficos propios en SVG, sin librerías externas.¦Custom SVG charts, no external libraries.]]</span></div></footer>
+
+<script>/*DATA*/</script>
+<script src="../assets/charts.js"></script>
+<script src="../assets/dash.js"></script>
+<script>
+(function(){
+  const D = window.DATA, T = D.test, $ = s => document.querySelector(s);
+  const ETAPA = {'Sesiones':'Sessions','Vio un producto':'Viewed a product','Agregó al carrito':'Added to cart','Inició checkout':'Started checkout','Compró':'Purchased'};
+  const DISP = {mobile:['Mobile','Mobile'],desktop:['Desktop','Desktop'],tablet:['Tablet','Tablet']};
+  const pp = v => (v>=0?'+':'') + fmt.dec(v*100,1) + ' pp';
+  const kpi = (l,v,n) => `<div class="kpi"><span>${l}</span><strong>${v}</strong>${n?`<small>${n}</small>`:''}</div>`;
+  const vol = $('#vol'); vol.value = Math.round(D.impacto.checkouts_mes/100)*100;
+
+  function calc(){
+    const v = +vol.value, I = D.impacto, r = T.res, rp = T.rps;
+    $('#vol-o').textContent = fmt.int(v);
+    $('#calc').innerHTML =
+      kpi(L('Compras extra por mes','Extra purchases / month'), '+'+fmt.int(v*r.diferencia), L('rango ','range ')+fmt.int(v*r.ic_bajo)+' – '+fmt.int(v*r.ic_alto)) +
+      kpi(L('Ingresos extra por mes','Extra revenue / month'), fmt.usd(v*rp.dif), L('rango ','range ')+fmt.usd(v*rp.ic_bajo)+' – '+fmt.usd(v*rp.ic_alto)) +
+      kpi(L('Ingresos extra por año','Extra revenue / year'), fmt.usdk(v*rp.dif*12), L('si el efecto se sostiene','if the effect holds'));
+  }
+
+  function render(){
+    const E = D.embudo, r = T.res;
+    $('#kpis').innerHTML =
+      kpi(L('Conversión de sesiones','Session conversion'), fmt.pct(D.limpieza.cr_limpia,2), L(`${fmt.int(D.limpieza.sesiones)} sesiones sin bots`,`${fmt.int(D.limpieza.sesiones)} sessions, bots removed`)) +
+      kpi(L('Fuga producto → carrito','Product → cart drop-off'), fmt.pct(1-E[2]['% de la etapa anterior'],0), L('la mayor del embudo','the largest in the funnel')) +
+      kpi(L('Mejora del checkout','Checkout uplift'), pp(r.diferencia), `p ${r.p_valor<.001?'< 0,001':'= '+fmt.dec(r.p_valor,3)} · ${L('IC','CI')} ${pp(r.ic_bajo)} ${L('a','to')} ${pp(r.ic_alto)}`.replace('0,001', L('0,001','0.001'))) +
+      kpi(L('Efecto en mobile','Mobile effect'), pp(T.seg.find(s=>s.dispositivo==='mobile').diferencia), L('desktop sin cambio significativo','no significant change on desktop')) +
+      kpi(L('Ingresos extra por mes','Extra revenue / month'), fmt.usd(D.impacto.diferencia), L('proyección con el IC del bootstrap','projection using the bootstrap CI'));
+
+    DC.bars($('#ch-emb'), {horizontal:true, labels:E.map(e=>L(e.etapa,ETAPA[e.etapa])), labelW:130, rowH:38,
+      series:[{name:'', data:E.map(e=>e.sesiones), colors:E.map((e,i)=>i===2?'#e86f5a':'#c5f23a')}],
+      xFmt:v=>fmt.int(v), tipFmt:v=>fmt.int(v)+' · '+fmt.pct(v/E[0].sesiones,1)+L(' del total',' of total')});
+
+    $('#ab').innerHTML = `<div><span>A · ${L('control, 3 pasos','control, 3 steps')}</span><strong>${fmt.pct(r.A,1)}</strong><small>${fmt.int(T.n.A)} checkouts</small></div>
+      <div class="win"><span>B · ${L('una página','one page')}</span><strong style="color:var(--acc)">${fmt.pct(r.B,1)}</strong><small>${fmt.int(T.n.B)} checkouts · ${L('mejora relativa ','relative lift ')}+${fmt.pct(r.mejora_relativa,1)}</small></div>`;
+    const rows = [{...r, n:'Total'}].concat(T.seg.map(s=>({...s, n:L(...DISP[s.dispositivo])})));
+    const lo = -.15, hi = .15, X = v => ((v-lo)/(hi-lo)*100).toFixed(2)+'%';
+    $('#forest').innerHTML = rows.map(s=>{ const ok = s.ic_bajo>0, c = ok?'#c5f23a':'#6c7465';
+      return `<div class="fr"><span class="lab">${s.n}</span><div class="bar"><i class="zero" style="left:${X(0)}"></i><i class="ci" style="left:${X(Math.max(lo,s.ic_bajo))};width:calc(${X(Math.min(hi,s.ic_alto))} - ${X(Math.max(lo,s.ic_bajo))});background:${c}"></i><i class="pt" style="left:${X(s.diferencia)};background:${c}"></i></div><span class="val" style="color:${ok?'var(--acc)':'var(--muted)'}">${pp(s.diferencia)}</span></div>`; }).join('');
+    $('#scale').innerHTML = '<span>−15</span><span>0</span><span>+15 pp</span>';
+
+    DC.line($('#ch-acum'), {labels:T.acum.fechas, yMin:.5, yMax:.7, series:[{name:L('A · control','A · control'), data:T.acum.A, color:'#6c7465'},{name:L('B · una página','B · one page'), data:T.acum.B, color:'#c5f23a'}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,1)});
+
+    const C = [...D.canales].sort((a,b)=>b.ingreso_por_sesion-a.ingreso_por_sesion);
+    DC.bars($('#ch-can'), {horizontal:true, labels:C.map(c=>c.canal), labelW:160, series:[{name:'', data:C.map(c=>c.ingreso_por_sesion), colors:C.map(c=>c.ingreso_por_sesion<2?'#e86f5a':'#c5f23a')}], xFmt:v=>'US$ '+fmt.dec(v,2)});
+    $('#tb-can').innerHTML = `<thead><tr><th>${L('Canal','Channel')}</th><th class="num">${L('% sesiones','% sessions')}</th><th class="num">${L('% ingresos','% revenue')}</th><th class="num">${L('Conversión','Conversion')}</th></tr></thead><tbody>` +
+      C.map(c=>`<tr><td>${c.canal}</td><td class="num">${fmt.pct(c['% sesiones'],0)}</td><td class="num">${fmt.pct(c['% ingresos'],0)}</td><td class="num">${fmt.pct(c.conversion,1)}</td></tr>`).join('')+'</tbody>';
+
+    const S = T.seg;
+    DC.bars($('#ch-disp'), {labels:S.map(s=>L(...DISP[s.dispositivo])), yMax:.8, series:[{name:'A · control', data:S.map(s=>s.A), color:'#6c7465'},{name:L('B · una página','B · one page'), data:S.map(s=>s.B), color:'#c5f23a'}], yFmt:v=>Math.round(v*100)+'%', tipFmt:v=>fmt.pct(v,1)});
+    calc();
+
+    const DS = L([
+      ['Hipótesis','Un checkout en <b>una sola página</b> con pago express reduce el abandono, sobre todo en mobile.'],
+      ['Métrica principal','% de sesiones que inician el checkout y terminan en compra. <b>Control:</b> ticket promedio.'],
+      ['Muestra',`Necesaria para detectar +4 pp con 80% de potencia: <b>${fmt.int(T.n_req)}</b> por grupo. Real: <b>${fmt.int(Math.min(T.n.A,T.n.B))}</b>.`],
+      ['Asignación (SRM)',`A ${fmt.int(T.n.A)} · B ${fmt.int(T.n.B)} · p = ${fmt.dec(T.p_srm,2)}: <b>división pareja</b>.`],
+      ['Ticket (control)',`A ${fmt.usd(T.ticket.A)} · B ${fmt.usd(T.ticket.B)} · Mann-Whitney p = ${fmt.dec(T.ticket.p,2)}: <b>sin diferencia</b>.`],
+      ['Segmentos','Corrección de Bonferroni (α = 0,0167) para las 3 comparaciones por dispositivo.'],
+    ],[
+      ['Hypothesis','A <b>one-page</b> checkout with express payment reduces abandonment, especially on mobile.'],
+      ['Primary metric','% of sessions that start checkout and end in a purchase. <b>Guardrail:</b> average order value.'],
+      ['Sample',`Needed to detect +4 pp at 80% power: <b>${fmt.int(T.n_req)}</b> per group. Actual: <b>${fmt.int(Math.min(T.n.A,T.n.B))}</b>.`],
+      ['Assignment (SRM)',`A ${fmt.int(T.n.A)} · B ${fmt.int(T.n.B)} · p = ${fmt.dec(T.p_srm,2)}: <b>balanced split</b>.`],
+      ['Order value (guardrail)',`A ${fmt.usd(T.ticket.A)} · B ${fmt.usd(T.ticket.B)} · Mann-Whitney p = ${fmt.dec(T.ticket.p,2)}: <b>no difference</b>.`],
+      ['Segments','Bonferroni correction (α = 0.0167) for the 3 device comparisons.'],
+    ]);
+    $('#design').innerHTML = DS.map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('');
+    const F = L([
+      ['2,4% del tráfico eran bots','Un scraper de precios inflaba las visitas. Sin limpiarlo, la conversión se subestimaba.'],
+      ['La fuga está en la página de producto','El 81% de quienes ven un producto no lo agrega al carrito; el checkout pierde al 45%.'],
+      ['Paid social rinde poco','33% de las sesiones y solo 12% de los ingresos: US$ 1,14 por sesión en Instagram contra US$ 6,51 del newsletter.'],
+      ['El checkout de una página gana','+5,1 pp de conversión (IC +2,6 a +7,6; p < 0,001) y +US$ 3,13 por checkout, sin bajar el ticket.'],
+      ['Casi todo el efecto es mobile','+9,0 pp en mobile; en desktop y tablet la diferencia no es significativa.'],
+    ],[
+      ['2.4% of traffic was bots','A price scraper was inflating visits. Without removing it, conversion was underestimated.'],
+      ['The leak is on the product page','81% of people who view a product don\'t add it to the cart; checkout loses 45%.'],
+      ['Paid social underperforms','33% of sessions but only 12% of revenue: US$ 1.14 per session on Instagram vs US$ 6.51 from the newsletter.'],
+      ['The one-page checkout wins','+5.1 pp conversion (CI +2.6 to +7.6; p < 0.001) and +US$ 3.13 per checkout, with no drop in order value.'],
+      ['Almost all the effect is mobile','+9.0 pp on mobile; on desktop and tablet the difference isn\'t significant.'],
+    ]);
+    $('#finds').innerHTML = F.map((f,i)=>`<div class="find"><i>0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+    const R = L([
+      ['Lanzar B para todo el tráfico','Impacto esperado: ~225 compras y ~US$ 14.000 más por mes.'],
+      ['Próximo test: página de producto','Mostrar envío y cuotas arriba del botón de compra; fotos con talle real.'],
+      ['Medir mejor paid social','Revisar su aporte con atribución de más largo plazo antes de recortar presupuesto.'],
+      ['Filtro de bots permanente','Excluir sesiones de 0 segundos con 20+ páginas y alertar fuentes nuevas con ese patrón.'],
+    ],[
+      ['Roll out B to all traffic','Expected impact: ~225 purchases and ~US$ 14,000 more per month.'],
+      ['Next test: product page','Show shipping and installments above the buy button; photos with real sizing.'],
+      ['Measure paid social better','Review its contribution with longer-window attribution before cutting budget.'],
+      ['Permanent bot filter','Exclude 0-second sessions with 20+ pages and alert on new sources with that pattern.'],
+    ]);
+    $('#recs').innerHTML = R.map((f,i)=>`<div class="find rec"><i>→ 0${i+1}</i><h3>${f[0]}</h3><p>${f[1]}</p></div>`).join('');
+  }
+  vol.addEventListener('input', calc);
+  document.addEventListener('langchange', render);
+})();
+</script>
+</body>
+</html>
